@@ -1,0 +1,6 @@
+lang: "ko"
+
+구매제한:
+  world: 99
+  world_nether: 4
+  world_the_end: 0

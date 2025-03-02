@@ -1,0 +1,14 @@
+name: Chunkly
+version: ${version}
+main: kr.apo2073.chunkly.Chunkly
+api-version: '1.20'
+authors: [ 아포칼립스 ]
+depend: [ProtocolLib, Vault]
+softdepend: [PlaceholderAPI]
+commands:
+  땅:
+permissions:
+  apo.chunkly.*:
+    default: not op
+libraries:
+  - org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.1.0
