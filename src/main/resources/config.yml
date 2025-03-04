@@ -1,10 +1,16 @@
 lang: "ko"
 
+# 월드 가드 필요
+# 구매를 시도하는 청크에 해당 구역이 존재할 경우 구매 불가
+cant-bought-region:
+  - spawn1
 
-
-구매불가:
+# 구매 불가 월드
+cant-bought:
   - spawn
-구매제한:
+
+# 월드별 구매 가능 최대 개수
+bought-limit:
   world: 99
   world_nether: 4
   world_the_end: 0

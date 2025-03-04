@@ -8,7 +8,6 @@ import kr.apo2073.chunkly.utils.LangManager.translate
 import net.milkbowl.vault.economy.Economy
 import org.bukkit.plugin.java.JavaPlugin
 
-
 class Chunkly : JavaPlugin() {
     companion object {
         lateinit var plugin: JavaPlugin
@@ -25,14 +24,20 @@ class Chunkly : JavaPlugin() {
             return;
         }
 
-        plugin = this
-        protocolManager= ProtocolLibrary.getProtocolManager()
+        try{
+            plugin = this
+            protocolManager = ProtocolLibrary.getProtocolManager()
 
-        saveDefaultConfig()
-        saveResource("lang/ko.json", true)
+            saveDefaultConfig()
+            saveResource("lang/ko.json", true)
+//        saveResource("chunkdata/example-chunk.yml", true)
+//        saveResource("userdata/example-user.yml", true)
 
-        server.pluginManager.registerEvents(PlayerInteraction(), this)
-        GroundCommand(this)
+            server.pluginManager.registerEvents(PlayerInteraction(), this)
+            GroundCommand(this)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     private fun setupEconomy(): Boolean {

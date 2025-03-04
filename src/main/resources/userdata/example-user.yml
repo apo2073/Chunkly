@@ -1,0 +1,9 @@
+user:
+  name: Steve
+  uuid: 96b6bdfc-2200-4d40-872f-eb558871aa4e
+  has-chunk:
+    - 11235648651232
+    - 15879645136156
+  has-permissions:
+    - 02487941231021
+    - 85123202314478
