@@ -32,8 +32,8 @@ class Chunkly : JavaPlugin() {
 
             saveDefaultConfig()
             saveResource("lang/ko.json", true)
-//        saveResource("chunkdata/example-chunk.yml", true)
-//        saveResource("userdata/example-user.yml", true)
+            saveResource("chunkdata/example-chunk.yml", true)
+            saveResource("userdata/example-user.yml", true)
 
             server.pluginManager.registerEvents(PlayerInteraction(), this)
             GroundCommand(this)

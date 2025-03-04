@@ -46,7 +46,7 @@ class PlayerInteraction:Listener {
     @EventHandler
     fun ChunkLoadEvent.onLoad() {
         val chunks= Chunks(chunk)
-        val members=chunks.getMembers().map { Bukkit.getPlayer(it) ?: return }
+        val members=chunks.getMembers()?.map { Bukkit.getPlayer(it) ?: return } ?: return
         members.forEach {
             it.addAttachment(plugin)
                 .setPermission(
