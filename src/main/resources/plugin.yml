@@ -4,7 +4,7 @@ main: kr.apo2073.chunkly.Chunkly
 api-version: '1.20'
 authors: [ 아포칼립스 ]
 depend: [ProtocolLib, Vault]
-softdepend: [PlaceholderAPI]
+softdepend: [PlaceholderAPI, WorldGuards]
 commands:
   땅:
 permissions:

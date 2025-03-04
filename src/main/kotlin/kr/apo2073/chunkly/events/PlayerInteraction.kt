@@ -14,7 +14,7 @@ import org.bukkit.event.player.PlayerItemHeldEvent
 class PlayerInteraction:Listener {
     private val chunkBounder=ChunkBorder()
     init {
-        this.chunkBounder.startParticleTask()
+//        this.chunkBounder.startParticleTask()
     }
     private val plugin=Chunkly.plugin
     @EventHandler
@@ -35,9 +35,9 @@ class PlayerInteraction:Listener {
         val config=YamlConfiguration.loadConfiguration(file)
         val chunkItem= config.getItemStack("items") ?: return
 
-        chunkBounder.enabledPlayers.remove(player.uniqueId)
+//        chunkBounder.enabledPlayers.remove(player.uniqueId)
         if (player.inventory.itemInMainHand.isEmpty) return
         if (!this.player.inventory.itemInMainHand.isSimilar(chunkItem)) return
-        chunkBounder.enabledPlayers.add(player.uniqueId)
+//        chunkBounder.enabledPlayers.add(player.uniqueId)
     }
 }

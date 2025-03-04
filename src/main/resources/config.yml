@@ -1,5 +1,9 @@
 lang: "ko"
 
+
+
+구매불가:
+  - spawn
 구매제한:
   world: 99
   world_nether: 4

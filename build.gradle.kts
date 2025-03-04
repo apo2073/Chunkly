@@ -16,12 +16,14 @@ repositories {
     }
     maven("https://jitpack.io")
     maven("https://repo.dmulloy2.net/repository/public/")
+    maven("https://maven.enginehub.org/repo/")
 }
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     compileOnly("com.github.MilkBowl:VaultAPI:1.7.1")
+    compileOnly("com.sk89q.worldguard:worldguard-bukkit:7.1.0-SNAPSHOT")
     implementation("com.comphenix.protocol:ProtocolLib:5.3.0")
 }
 
@@ -44,5 +46,6 @@ tasks.processResources {
 }
 tasks.jar {
     archiveFileName.set("Chunkly.jar")
-    destinationDirectory=file("C:\\Users\\PC\\Desktop\\Chunkly\\server\\plugins")
+//    destinationDirectory=file("C:\\Users\\PC\\Desktop\\Chunkly\\server\\plugins")
+    destinationDirectory=file("C:\\Users\\이태수\\Desktop\\Chunkly\\server\\plugins")
 }
