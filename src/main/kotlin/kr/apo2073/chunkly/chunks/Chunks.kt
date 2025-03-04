@@ -50,7 +50,7 @@ class Chunks {
 //        return getConfig().getStringList("members")
         return UserData.getConfig(
             Bukkit.getPlayer(getOwner().toString())?.uniqueId ?: return null
-        ).getStringList("share-permissions")
+        ).getStringList("user.share-permissions")
     }
 
     private var file:File
