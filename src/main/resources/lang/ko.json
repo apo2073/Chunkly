@@ -1,13 +1,17 @@
 {
   "plugin.disable.cause.vault": "Vault와(과) 연결 할 수 없습니다",
 
-  "command.cant.use": "&c이 명령어를 사용 할 수 없습니다!",
+  "command.cant.use": "&l&c이 명령어를 사용 할 수 없습니다!",
 
   "command.ground.usage": "&l올바른 명령어를 입력해 주세요|&l ⌊ &7/땅 구매아이템설정 &f- 손에 든 아이템을 청크 구매 아이템으로 설정합니다",
-  "command.ground.cant.buy": "&c해당 청크는 구매가 불가능합니다!",
-  "command.ground.buy.suc": "&a청크&f를 구매 했습니다",
+  "command.ground.cant.buy": "&l&c해당 청크는 구매가 불가능합니다!",
 
-  "chunk.cant.interaction": "해당 청크는 소유자가 존재합니다.",
+  "chunk.buy.suc": "&l&a청크&f를 구매 했습니다",
+  "chunk.not.enough.money": "&l돈이 충분하지 않습니다.",
+  "chunk.own.to.other": "&l해당 청크의 &a소유권&f을 &e{to}&f에게 옮겼습니다",
+  "chunk.own.bought": "&l해당 청크의 &a소유권&f을 옮겨 받았습니다",
+
+  "chunk.cant.interaction": "&l해당 청크는 소유자가 존재합니다.",
 
   "placeholder.owner.null": "[없음]"
 }

@@ -29,9 +29,12 @@ class Chunks {
         )
     }
 
-    fun setOwner(player: Player) {
+    fun setOwner(player: Player?) {
         chunks?.persistentDataContainer?.set(
-            NamespacedKey(plugin, "owner"), PersistentDataType.STRING, player.name
+            NamespacedKey(plugin, "owner"), PersistentDataType.STRING, player?.name ?: run {
+                chunks?.persistentDataContainer?.remove(NamespacedKey(plugin, "owner"))
+                return
+            }
         ) ?: return
     }
 
