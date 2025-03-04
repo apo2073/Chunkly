@@ -9,9 +9,18 @@ import org.bukkit.entity.Player
 import org.bukkit.persistence.PersistentDataType
 import java.io.File
 
-class Chunks(x: Double, z: Double, world:World) {
+class Chunks {
+    private var chunks: Chunk?
     private val plugin= Chunkly.plugin
-    private var chunks: Chunk? = plugin.server.getWorld(world.uid)?.getChunkAt(x.toInt(), z.toInt())
+    constructor(chunk: Chunk) {
+        chunks=chunk
+        file=File("${plugin.dataFolder}/chunkdata", "${chunks?.chunkKey}.yml")
+    }
+    constructor(x: Double, z: Double, world:World) {
+        chunks=plugin.server.getWorld(world.uid)?.getChunkAt(x.toInt(), z.toInt())
+        file=File("${plugin.dataFolder}/chunkdata", "${chunks?.chunkKey}.yml")
+    }
+
     fun getOwner():String? {
         return chunks?.persistentDataContainer?.get(
             NamespacedKey(plugin, "owner"), PersistentDataType.STRING
@@ -34,11 +43,13 @@ class Chunks(x: Double, z: Double, world:World) {
         return getConfig().getStringList("members")
     }
 
-    private var file=File("${plugin.dataFolder}/chunkdata", "${chunks?.chunkKey}.yml")
+    private lateinit var file:File
     fun getConfig():YamlConfiguration {
         file=File("${plugin.dataFolder}/chunkdata", "${chunks?.chunkKey}.yml")
         return YamlConfiguration.loadConfiguration(file)
     }
 
     fun getChunk(): Chunk? = chunks
+
+    fun canBuy():Boolean = getOwner()==null
 }

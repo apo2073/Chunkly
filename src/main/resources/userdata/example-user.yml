@@ -4,6 +4,6 @@ user:
   has-chunk:
     - 11235648651232
     - 15879645136156
-  has-permissions:
-    - 02487941231021
-    - 85123202314478
+  share-permissions:
+    - b420b472-adf6-4e2d-8b28-72da0658ccab
+    - 96ec943c-24a4-4125-a2c2-bf87e997abbc

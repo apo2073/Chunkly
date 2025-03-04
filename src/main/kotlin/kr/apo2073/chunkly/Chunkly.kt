@@ -4,8 +4,10 @@ import com.comphenix.protocol.ProtocolLibrary
 import com.comphenix.protocol.ProtocolManager
 import kr.apo2073.chunkly.cmds.GroundCommand
 import kr.apo2073.chunkly.events.PlayerInteraction
+import kr.apo2073.chunkly.papi.PlaceHolderHandler
 import kr.apo2073.chunkly.utils.LangManager.translate
 import net.milkbowl.vault.economy.Economy
+import org.bukkit.Bukkit
 import org.bukkit.plugin.java.JavaPlugin
 
 class Chunkly : JavaPlugin() {
@@ -35,6 +37,9 @@ class Chunkly : JavaPlugin() {
 
             server.pluginManager.registerEvents(PlayerInteraction(), this)
             GroundCommand(this)
+
+            if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null)
+                PlaceHolderHandler().register()
         } catch (e: Exception) {
             e.printStackTrace()
         }
