@@ -2,6 +2,7 @@ package kr.apo2073.chunkly
 
 import com.comphenix.protocol.ProtocolLibrary
 import com.comphenix.protocol.ProtocolManager
+import kr.apo2073.chunkly.chunks.ChunkBorder
 import kr.apo2073.chunkly.cmds.ChunkCommand
 import kr.apo2073.chunkly.events.PlayerInteraction
 import kr.apo2073.chunkly.papi.PlaceHolderHandler
@@ -37,6 +38,7 @@ class Chunkly : JavaPlugin() {
 
             server.pluginManager.registerEvents(PlayerInteraction(), this)
             ChunkCommand(this)
+            ChunkBorder.start()
 
             if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null)
                 PlaceHolderHandler().register()

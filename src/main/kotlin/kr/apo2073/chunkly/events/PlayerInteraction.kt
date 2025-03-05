@@ -15,6 +15,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerItemHeldEvent
 import org.bukkit.event.world.ChunkLoadEvent
+import org.bukkit.inventory.ItemStack
 
 class PlayerInteraction:Listener {
     private val chunkBounder=ChunkBorder()
@@ -39,17 +40,17 @@ class PlayerInteraction:Listener {
         EconManager.buyChunk(chunk, player)
     }
 
-    @EventHandler
-    fun PlayerItemHeldEvent.onHeld() {
-        val file=getConfigFile("items")
-        val config=YamlConfiguration.loadConfiguration(file)
-        val chunkItem= config.getItemStack("items") ?: return
-
-//        chunkBounder.enabledPlayers.remove(player.uniqueId)
-        if (player.inventory.itemInMainHand.isEmpty) return
-        if (!this.player.inventory.itemInMainHand.isSimilar(chunkItem)) return
-//        chunkBounder.enabledPlayers.add(player.uniqueId)
-    }
+//    @EventHandler
+//    fun PlayerItemHeldEvent.onHeld() {
+//        val file=getConfigFile("items")
+//        val config=YamlConfiguration.loadConfiguration(file)
+//        val chunkItem= config.getItemStack("items") ?: return
+//
+////        chunkBounder.enabledPlayers.remove(player.uniqueId)
+//        if (player.inventory.itemInMainHand.isEmpty) return
+//        if (!this.player.inventory.itemInMainHand.isSimilar(chunkItem)) return
+////        chunkBounder.enabledPlayers.add(player.uniqueId)
+//    }
 
     @EventHandler
     fun ChunkLoadEvent.onLoad() {

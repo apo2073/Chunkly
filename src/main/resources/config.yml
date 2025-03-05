@@ -20,3 +20,5 @@ chunk-price:
   default: 100000 # 개별 설정되지 않은 모든 월드 청크 가격
   each:
     survival: 50000 # 월드 별 청크 가격 설정
+
+particle: end_rod
