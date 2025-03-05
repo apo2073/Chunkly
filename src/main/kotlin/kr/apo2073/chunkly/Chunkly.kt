@@ -2,7 +2,7 @@ package kr.apo2073.chunkly
 
 import com.comphenix.protocol.ProtocolLibrary
 import com.comphenix.protocol.ProtocolManager
-import kr.apo2073.chunkly.cmds.GroundCommand
+import kr.apo2073.chunkly.cmds.ChunkCommand
 import kr.apo2073.chunkly.events.PlayerInteraction
 import kr.apo2073.chunkly.papi.PlaceHolderHandler
 import kr.apo2073.chunkly.utils.LangManager.translate
@@ -36,7 +36,7 @@ class Chunkly : JavaPlugin() {
             saveResource("userdata/example-user.yml", true)
 
             server.pluginManager.registerEvents(PlayerInteraction(), this)
-            GroundCommand(this)
+            ChunkCommand(this)
 
             if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null)
                 PlaceHolderHandler().register()
@@ -49,7 +49,9 @@ class Chunkly : JavaPlugin() {
         if (server.pluginManager.getPlugin("Vault") == null) {
             return false
         }
-        val rsp = server.servicesManager.getRegistration(Economy::class.java) ?: return false
+        val rsp = server.servicesManager.getRegistration(
+            Economy::class.java
+        ) ?: return false
         econ = rsp.provider
         return econ != null
     }

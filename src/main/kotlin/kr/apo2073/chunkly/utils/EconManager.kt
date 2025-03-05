@@ -25,11 +25,10 @@ object EconManager {
     }
 
     fun buyChunk(chunk: Chunk, owner: Player) {
-        var price= plugin.config.getDouble("chunk-price.each.${chunk.world.name}")
+        var price= plugin.config.getDouble("chunk-price.each.${chunk.world.name}", 0.0)
         if (price==0.0 || price==null) price= plugin.config.getDouble("chunk-price.default")
-        if (getMoney(owner)>=price) {
-            owner.sendMessage(translate("chunk.buy.suc"), true)
-        } else {
+        if (getMoney(owner)>=price) owner.sendMessage(translate("chunk.buy.suc"), true)
+        else {
             owner.sendMessage(translate("chunk.not.enough.money"), true)
             return
         }
@@ -39,7 +38,7 @@ object EconManager {
     }
 
     fun sellChunk(chunk: Chunk, to:Player) {
-        var price= plugin.config.getDouble("chunk-price.each.${chunk.world.name}")
+        var price= plugin.config.getDouble("chunk-price.each.${chunk.world.name}", 0.0)
         if (price==0.0 || price==null) price= plugin.config.getDouble("chunk-price.default")
         val chunks=Chunks(chunk)
         chunks.setOwner(to)

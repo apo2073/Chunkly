@@ -13,5 +13,7 @@ permissions:
     children:
       apo.chunkly.cmds:
         default: not op
+      apo.chunkly.set.item:
+        default: not op
 libraries:
   - org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.1.0

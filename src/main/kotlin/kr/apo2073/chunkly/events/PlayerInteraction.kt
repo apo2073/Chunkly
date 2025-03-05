@@ -4,6 +4,9 @@ import kr.apo2073.chunkly.Chunkly
 import kr.apo2073.chunkly.chunks.ChunkBorder
 import kr.apo2073.chunkly.chunks.Chunks
 import kr.apo2073.chunkly.utils.ConfigManager.getConfigFile
+import kr.apo2073.chunkly.utils.EconManager
+import kr.apo2073.chunkly.utils.LangManager.translate
+import kr.apo2073.chunkly.utils.sendMessage
 import kr.apo2073.chunkly.utils.str2Component
 import org.bukkit.Bukkit
 import org.bukkit.configuration.file.YamlConfiguration
@@ -27,10 +30,15 @@ class PlayerInteraction:Listener {
 
         if (!(this.item?.isSimilar(chunkItem) ?: return)) return
         val chunk=player.chunk
-        chunk.also {
-            Bukkit.broadcast("${it.x}, ${it.z}".str2Component())
+//        chunk.also { Bukkit.broadcast("${it.x}, ${it.z}".str2Component()) }
+        val chunks=Chunks(chunk)
+        if (!chunks.canBuy()) {
+            player.sendMessage(translate("command.ground.cant.buy"), true)
+            return
         }
+        EconManager.buyChunk(chunk, player)
     }
+
     @EventHandler
     fun PlayerItemHeldEvent.onHeld() {
         val file=getConfigFile("items")
