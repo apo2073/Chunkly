@@ -2,6 +2,7 @@ package kr.apo2073.chunkly.data
 
 import kr.apo2073.chunkly.Chunkly
 import org.bukkit.configuration.file.YamlConfiguration
+import org.bukkit.entity.Player
 import java.io.File
 import java.util.UUID
 
@@ -23,6 +24,17 @@ class UserData {
             val list= getConfig(uuid).getStringList("user.has-chunk")
             list.add(chunkKey)
             setValue("user.has-chunk", list, uuid)
+        }
+
+        fun addMember(player: Player, uuid: UUID) {
+            val list= getConfig(uuid).getStringList("user.share-permissions")
+            list.add(player.uniqueId.toString())
+            setValue("user.share-permissions", list, uuid)
+        }
+        fun removeMember(player: Player, uuid: UUID) {
+            val list= getConfig(uuid).getStringList("user.share-permissions")
+            list.remove(player.uniqueId.toString())
+            setValue("user.share-permissions", list, uuid)
         }
     }
 }

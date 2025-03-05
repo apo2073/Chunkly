@@ -6,12 +6,14 @@ import kr.apo2073.chunkly.utils.ConfigManager.getConfigFile
 import kr.apo2073.chunkly.utils.EconManager
 import kr.apo2073.chunkly.utils.LangManager.translate
 import kr.apo2073.chunkly.utils.sendMessage
+import org.bukkit.Bukkit
 import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 import org.bukkit.command.TabExecutor
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.entity.Player
 import org.bukkit.plugin.java.JavaPlugin
+import java.io.File
 
 class ChunkCommand(plugin: JavaPlugin): TabExecutor {
     private val plugin=Chunkly.plugin
@@ -31,17 +33,30 @@ class ChunkCommand(plugin: JavaPlugin): TabExecutor {
             when(p3[0]) {
                 "구매아이템설정"-> performItem(p0)
                 "목록"-> performList(p0)
-                "소유권이전"-> performOwning(p0, p3)
                 else-> sendUsage(p0)
             }
-
-            return true
         }
+        if (p3.size==2) performOwning(p0, p3)
+        if (p3.size==3) performPermission(p0, p3)
         return true
     }
 
     private fun performOwning(p0: Player, p3: Array<out String>) {
 //        EconManager.sellChunk(p0.chunk, p3[])
+        sendUsage(p0)
+    }
+
+    private fun performPermission(p0: CommandSender, p3: Array<out String>) {
+        val execute=p3[1]
+        val player= Bukkit.getPlayer(p3[2]) ?: return
+        if (execute=="추가") {
+            p0.sendMessage(translate("command.ground.member.add"), true)
+            UserData.addMember(player, (p0 as Player).uniqueId)
+        }
+        if (execute=="제거") {
+            p0.sendMessage(translate("command.ground.member.remove"), true)
+            UserData.removeMember(player, (p0 as Player).uniqueId)
+        }
     }
 
     private fun performItem(p0: CommandSender) {
@@ -61,16 +76,20 @@ class ChunkCommand(plugin: JavaPlugin): TabExecutor {
     }
 
     private fun performList(p0: CommandSender) {
-        if (!p0.hasPermission("apo.chunkly.cmds")) {
-            p0.sendMessage(translate("command.no.permission"), true)
-            return
+        if (!p0.isOp) {
+            if (!p0.hasPermission("apo.chunkly.cmds")) {
+                p0.sendMessage(translate("command.no.permission"), true)
+                return
+            }
+            val player = p0 as Player
+            val list = UserData.getConfig(player.uniqueId).getStringList("user.has-chunk")
+            val msg = translate("command.ground.list").split("|")
+            player.sendMessage(msg[0], true)
+            for (chunk in list)
+                player.sendMessage(msg[1].replace("{list}", chunk), true)
+        } else {
+            val list= File("${plugin.dataFolder}", "chunkdata").listFiles()
         }
-        val player=p0 as Player
-        val list=UserData.getConfig(player.uniqueId).getStringList("has-chunk")
-        val msg= translate("command.ground.list").split("|")
-        player.sendMessage(msg[0], true)
-        for (chunk in list)
-            player.sendMessage(msg[1].replace("{list}", chunk), true)
     }
 
     private fun sendUsage(p0: CommandSender) {
@@ -92,7 +111,7 @@ class ChunkCommand(plugin: JavaPlugin): TabExecutor {
             tab.addAll(arrayOf(
 //                "구매아이템설정",
                 "목록",
-                "소유권이전",
+//                "소유권이전",
                 "권한"
             ))
             if (p0.hasPermission("apo.chunkly.set.item")) tab.add("구매아이템설정")

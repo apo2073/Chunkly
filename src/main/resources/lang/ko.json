@@ -8,6 +8,8 @@
   "command.ground.cant.buy": "&l&c해당 청크는 구매가 불가능합니다!",
   "command.ground.held.item": "&l&c손에 아이템을 들어주세요!",
   "command.ground.list": "&l&a청크 &f리스르|&l ⌊ &b{list}",
+  "command.ground.member.add": "&l플레이어 &e{player}&f에게 권한을 공유했습니다",
+  "command.ground.member.remove": "&l플레이어 &e{player}&f의 권한을 제거했습니다",
 
   "chunk.buy.suc": "&l&a청크&f를 구매 했습니다",
   "chunk.not.enough.money": "&l돈이 충분하지 않습니다.",

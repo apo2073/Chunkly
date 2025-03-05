@@ -2,6 +2,7 @@ package kr.apo2073.chunkly
 
 import kr.apo2073.chunkly.chunks.ChunkBorder
 import kr.apo2073.chunkly.cmds.ChunkCommand
+import kr.apo2073.chunkly.events.PlayerChunkInteraction
 import kr.apo2073.chunkly.events.PlayerInteraction
 import kr.apo2073.chunkly.papi.PlaceHolderHandler
 import kr.apo2073.chunkly.utils.LangManager.translate
@@ -35,6 +36,7 @@ class Chunkly : JavaPlugin() {
 //            protocolManager = ProtocolLibrary.getProtocolManager()
 
             server.pluginManager.registerEvents(PlayerInteraction(), this)
+            server.pluginManager.registerEvents(PlayerChunkInteraction(), this)
             ChunkCommand(this)
             ChunkBorder.start()
 

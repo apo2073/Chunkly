@@ -2,6 +2,7 @@ package kr.apo2073.chunkly.utils
 
 import kr.apo2073.chunkly.Chunkly
 import kr.apo2073.chunkly.chunks.Chunks
+import kr.apo2073.chunkly.data.UserData
 import kr.apo2073.chunkly.utils.LangManager.translate
 import org.bukkit.Bukkit
 import org.bukkit.Chunk
@@ -34,6 +35,7 @@ object EconManager {
         }
         val chunks=Chunks(chunk)
         chunks.setOwner(owner)
+        UserData.addChunk(chunk.chunkKey.toString(), owner.uniqueId)
         takeMoney(owner, price)
     }
 
