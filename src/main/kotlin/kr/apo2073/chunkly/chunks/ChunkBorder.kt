@@ -3,9 +3,11 @@ package kr.apo2073.chunkly.chunks
 import kr.apo2073.chunkly.Chunkly
 import kr.apo2073.chunkly.utils.ConfigManager.getConfigFile
 import org.bukkit.Bukkit
+import org.bukkit.NamespacedKey
 import org.bukkit.Particle
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.entity.Player
+import org.bukkit.persistence.PersistentDataType
 
 class ChunkBorder {
     private val plugin=Chunkly.plugin
@@ -30,6 +32,13 @@ class ChunkBorder {
     }
 
     private fun show(player:Player, particle: Particle) {
+        if (
+            player.chunk.persistentDataContainer.get(
+                NamespacedKey(Chunkly.plugin, "owner"),
+                PersistentDataType.STRING
+            )!=null
+        ) return
+
         val loc = player.location
 
         val chunkX = loc.blockX shr 4

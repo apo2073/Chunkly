@@ -9,6 +9,7 @@ class UserData {
     companion object {
         fun getConfig(uuid: UUID): YamlConfiguration {
             val file= File("${Chunkly.plugin.dataFolder}/userdata", "$uuid.yml")
+            if (!file.exists()) file.createNewFile()
             return YamlConfiguration.loadConfiguration(file)
         }
         fun setValue(path:String, value:Any, uuid:UUID) {
@@ -16,6 +17,12 @@ class UserData {
             val config=YamlConfiguration.loadConfiguration(file)
             config.set(path, value)
             config.save(file)
+        }
+
+        fun addChunk(chunkKey:String, uuid: UUID) {
+            val list= getConfig(uuid).getStringList("user.has-chunk")
+            list.add(chunkKey)
+            setValue("user.has-chunk", list, uuid)
         }
     }
 }

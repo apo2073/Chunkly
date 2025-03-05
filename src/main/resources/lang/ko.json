@@ -13,6 +13,7 @@
   "chunk.not.enough.money": "&l돈이 충분하지 않습니다.",
   "chunk.own.to.other": "&l해당 청크의 &a소유권&f을 &e{to}&f에게 옮겼습니다",
   "chunk.own.bought": "&l해당 청크의 &a소유권&f을 옮겨 받았습니다",
+  "chunk.its.yours": "&l해당 청크는 이미 당신의 소유입니다.",
 
   "chunk.cant.interaction": "&l해당 청크는 소유자가 존재합니다.",
 

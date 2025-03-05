@@ -3,6 +3,7 @@ package kr.apo2073.chunkly.events
 import kr.apo2073.chunkly.Chunkly
 import kr.apo2073.chunkly.chunks.ChunkBorder
 import kr.apo2073.chunkly.chunks.Chunks
+import kr.apo2073.chunkly.data.UserData
 import kr.apo2073.chunkly.utils.ConfigManager.getConfigFile
 import kr.apo2073.chunkly.utils.EconManager
 import kr.apo2073.chunkly.utils.LangManager.translate
@@ -14,6 +15,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerItemHeldEvent
+import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.world.ChunkLoadEvent
 import org.bukkit.inventory.ItemStack
 
@@ -34,6 +36,10 @@ class PlayerInteraction:Listener {
 //        chunk.also { Bukkit.broadcast("${it.x}, ${it.z}".str2Component()) }
         val chunks=Chunks(chunk)
         if (!chunks.canBuy()) {
+            if (chunks.getOwner()==player.name) {
+                player.sendMessage(translate("chunk.its.yours"), true)
+                return
+            }
             player.sendMessage(translate("command.ground.cant.buy"), true)
             return
         }
@@ -63,5 +69,13 @@ class PlayerInteraction:Listener {
                     true
                 )
         }
+    }
+
+    @EventHandler
+    fun PlayerJoinEvent.onJoin() {
+        val uuid=player.uniqueId
+
+        UserData.setValue("user.name", player.name, uuid)
+        UserData.setValue("user.uuid", uuid.toString(), uuid)
     }
 }

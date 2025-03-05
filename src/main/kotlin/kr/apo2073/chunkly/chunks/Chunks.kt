@@ -31,11 +31,18 @@ class Chunks {
 
     fun setOwner(player: Player?) {
         chunks?.persistentDataContainer?.set(
-            NamespacedKey(plugin, "owner"), PersistentDataType.STRING, player?.name ?: run {
+            NamespacedKey(plugin, "owner"), PersistentDataType.STRING, (player?.uniqueId ?: run {
                 chunks?.persistentDataContainer?.remove(NamespacedKey(plugin, "owner"))
                 return
-            }
+            }).toString()
         ) ?: return
+
+        val config=getConfig()
+        config.set("chunk.key", chunks?.chunkKey)
+        config.set("chunk.location.x", chunks?.x)
+        config.set("chunk.location.z", chunks?.z)
+        config.set("chunk.owner", player?.name)
+        config.save(file)
     }
 
     fun addMember(player: Player) {

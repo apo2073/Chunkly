@@ -1,7 +1,5 @@
 package kr.apo2073.chunkly
 
-import com.comphenix.protocol.ProtocolLibrary
-import com.comphenix.protocol.ProtocolManager
 import kr.apo2073.chunkly.chunks.ChunkBorder
 import kr.apo2073.chunkly.cmds.ChunkCommand
 import kr.apo2073.chunkly.events.PlayerInteraction
@@ -15,26 +13,26 @@ class Chunkly : JavaPlugin() {
     companion object {
         lateinit var plugin: JavaPlugin
             private set
-        lateinit var protocolManager:ProtocolManager
-            private set
+//        lateinit var protocolManager:ProtocolManager
+//            private set
         lateinit var econ:Economy
     }
 
     override fun onEnable() {
-        if (!setupEconomy() ) {
-            logger.severe(translate("plugin.disable.cause.vault"));
-            server.pluginManager.disablePlugin(this);
-            return;
-        }
-
+        plugin = this
         try{
-            plugin = this
-            protocolManager = ProtocolLibrary.getProtocolManager()
-
             saveDefaultConfig()
             saveResource("lang/ko.json", true)
             saveResource("chunkdata/example-chunk.yml", true)
             saveResource("userdata/example-user.yml", true)
+
+            if (!setupEconomy() ) {
+                logger.severe(translate("plugin.disable.cause.vault"));
+                server.pluginManager.disablePlugin(this);
+                return;
+            }
+
+//            protocolManager = ProtocolLibrary.getProtocolManager()
 
             server.pluginManager.registerEvents(PlayerInteraction(), this)
             ChunkCommand(this)

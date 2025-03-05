@@ -9,11 +9,11 @@ commands:
   땅:
 permissions:
   apo.chunkly.*:
-    default: not op
+    default: op
     children:
       apo.chunkly.cmds:
         default: not op
       apo.chunkly.set.item:
-        default: not op
+        default: op
 libraries:
   - org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.1.0

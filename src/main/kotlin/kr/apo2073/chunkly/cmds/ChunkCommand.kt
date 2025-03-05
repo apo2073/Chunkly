@@ -68,8 +68,9 @@ class ChunkCommand(plugin: JavaPlugin): TabExecutor {
         val player=p0 as Player
         val list=UserData.getConfig(player.uniqueId).getStringList("has-chunk")
         val msg= translate("command.ground.list").split("|")
-        player.sendMessage(msg[0])
-        for (chunk in list) player.sendMessage(msg[1].replace("{list}", chunk))
+        player.sendMessage(msg[0], true)
+        for (chunk in list)
+            player.sendMessage(msg[1].replace("{list}", chunk), true)
     }
 
     private fun sendUsage(p0: CommandSender) {
