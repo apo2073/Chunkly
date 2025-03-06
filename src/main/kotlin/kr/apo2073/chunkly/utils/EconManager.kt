@@ -37,17 +37,18 @@ object EconManager {
         chunks.setOwner(owner)
         UserData.addChunk(chunk.chunkKey.toString(), owner.uniqueId)
         takeMoney(owner, price)
+        owner.inventory.itemInMainHand.amount-=1
     }
 
-    fun sellChunk(chunk: Chunk, to:Player) {
+    fun sellChunk(chunk: Chunk, to:Player?) {
         var price= plugin.config.getDouble("chunk-price.each.${chunk.world.name}", 0.0)
         if (price==0.0 || price==null) price= plugin.config.getDouble("chunk-price.default")
         val chunks=Chunks(chunk)
         chunks.setOwner(to)
         val owner= Bukkit.getPlayer(chunks.getOwner() ?: return) ?: return
-        takeMoney(to, price)
+        if (to != null) takeMoney(to, price)
         giveMoney(owner, price)
-        to.sendMessage(translate("chunk.own.bought"), true)
-        owner.sendMessage(translate("chunk.own.to.other").replace("{to}", to.name), true)
+        to?.sendMessage(translate("chunk.own.bought"), true)
+        owner.sendMessage(translate("chunk.own.to.other").replace("{to}", to?.name ?: return), true)
     }
 }
