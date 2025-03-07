@@ -12,36 +12,36 @@ import org.bukkit.persistence.PersistentDataType
 import java.io.File
 
 class Chunks {
-    private var chunks: Chunk?
+    private var chunk: Chunk?
     private val plugin= Chunkly.plugin
     constructor(chunk: Chunk) {
-        chunks=chunk
-        file=File("${plugin.dataFolder}/chunkdata", "${chunks?.chunkKey}.yml")
+        this.chunk =chunk
+        file=File("${plugin.dataFolder}/chunkdata", "${this.chunk?.chunkKey}.yml")
     }
     constructor(x: Double, z: Double, world:World) {
-        chunks=plugin.server.getWorld(world.uid)?.getChunkAt(x.toInt(), z.toInt())
-        file=File("${plugin.dataFolder}/chunkdata", "${chunks?.chunkKey}.yml")
+        chunk=plugin.server.getWorld(world.uid)?.getChunkAt(x.toInt(), z.toInt())
+        file=File("${plugin.dataFolder}/chunkdata", "${chunk?.chunkKey}.yml")
     }
 
     fun getOwner():String? {
-        return chunks?.persistentDataContainer?.get(
+        return chunk?.persistentDataContainer?.get(
             NamespacedKey(plugin, "owner"), PersistentDataType.STRING
         )
     }
 
     fun setOwner(player: Player?) {
-        chunks?.persistentDataContainer?.set(
+        chunk?.persistentDataContainer?.set(
             NamespacedKey(plugin, "owner"), PersistentDataType.STRING, (player?.uniqueId ?: run {
-                chunks?.persistentDataContainer?.remove(NamespacedKey(plugin, "owner"))
+                chunk?.persistentDataContainer?.remove(NamespacedKey(plugin, "owner"))
                 return
             }).toString()
         ) ?: return
 
         val config=getConfig()
-        config.set("chunk.key", chunks?.chunkKey)
-        config.set("chunk.location.x", chunks?.x)
-        config.set("chunk.location.z", chunks?.z)
-        config.set("chunk.world", chunks?.world?.uid.toString())
+        config.set("chunk.key", chunk?.chunkKey)
+        config.set("chunk.location.x", chunk?.x)
+        config.set("chunk.location.z", chunk?.z)
+        config.set("chunk.world", chunk?.world?.uid.toString())
         config.set("chunk.owner", player?.name)
         config.save(file)
     }
@@ -66,11 +66,11 @@ class Chunks {
 
     private var file:File
     fun getConfig():YamlConfiguration {
-        file=File("${plugin.dataFolder}/chunkdata", "${chunks?.chunkKey}.yml")
+        file=File("${plugin.dataFolder}/chunkdata", "${chunk?.chunkKey}.yml")
         return YamlConfiguration.loadConfiguration(file)
     }
 
-    fun getChunk(): Chunk? = chunks
+    fun getChunk(): Chunk? = chunk
 
     fun canBuy():Boolean = getOwner()==null
 }

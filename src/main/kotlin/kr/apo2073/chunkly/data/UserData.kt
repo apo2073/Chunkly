@@ -1,10 +1,13 @@
 package kr.apo2073.chunkly.data
 
 import kr.apo2073.chunkly.Chunkly
+import org.bukkit.Bukkit
+import org.bukkit.NamespacedKey
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.entity.Player
+import org.bukkit.persistence.PersistentDataType
 import java.io.File
-import java.util.UUID
+import java.util.*
 
 class UserData {
     companion object {
@@ -26,6 +29,10 @@ class UserData {
             setValue("user.has-chunk", list, uuid)
         }
 
+        fun getMember(uuid:UUID): List<UUID> {
+            val list= getConfig(uuid).getStringList("user.share-permissions")
+            return list.map { UUID.fromString(it) }
+        }
         fun addMember(player: Player, uuid: UUID) {
             val list= getConfig(uuid).getStringList("user.share-permissions")
             list.add(player.uniqueId.toString())
@@ -35,6 +42,20 @@ class UserData {
             val list= getConfig(uuid).getStringList("user.share-permissions")
             list.remove(player.uniqueId.toString())
             setValue("user.share-permissions", list, uuid)
+        }
+
+        fun countChunkInWorld(world: UUID, uuid: UUID):Int {
+            var count=0
+            val worlds=Bukkit.getWorld(world) ?: return 0
+            val list= getConfig(uuid).getStringList("user.has-chunk")
+            for (chunk in list) {
+                val key=chunk.toLongOrNull() ?: continue
+                val owner=worlds.getChunkAt(key).persistentDataContainer.get(
+                    NamespacedKey(Chunkly.plugin, "owner"), PersistentDataType.STRING
+                ) ?: continue
+                if (owner==uuid.toString()) count+=1
+            }
+            return count
         }
     }
 }

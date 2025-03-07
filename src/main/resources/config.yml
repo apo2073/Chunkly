@@ -12,6 +12,7 @@ cant-bought:
 
 # 월드별 구매 가능 최대 개수
 bought-limit:
+  default: 10
   world: 99
   world_nether: 4
   world_the_end: 0

@@ -156,7 +156,10 @@ class ChunkCommand(plugin: JavaPlugin): TabExecutor {
                                     "/땅 removeChunk $chunk"
                                 )))))
             } else {
-                p0.sendMessage(msg[1].replace("{list}", chunk), true)
+                val config=YamlConfiguration.loadConfiguration(getConfigFile(chunk))
+                val x=config.getInt("chunk.location.x")
+                val z=config.getInt("chunk.location.z")
+                p0.sendMessage("${msg[1].replace("{list}", chunk)} &7[ &a${x shl 4 + 8}&f, &a${z shl 4 + 8} &f]", true)
             }
         }
     }
