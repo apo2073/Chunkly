@@ -97,11 +97,11 @@ class ChunkCommand(plugin: JavaPlugin): TabExecutor {
         val execute=p3[1]
         val player= Bukkit.getPlayer(p3[2]) ?: return
         if (execute=="추가") {
-            p0.sendMessage(translate("command.ground.member.add"), true)
+            p0.sendMessage(translate("command.ground.member.add").replace("{player}", player.name), true)
             UserData.addMember(player, (p0 as Player).uniqueId)
         }
         if (execute=="제거") {
-            p0.sendMessage(translate("command.ground.member.remove"), true)
+            p0.sendMessage(translate("command.ground.member.remove").replace("{player}", player.name), true)
             UserData.removeMember(player, (p0 as Player).uniqueId)
         }
     }
@@ -159,7 +159,7 @@ class ChunkCommand(plugin: JavaPlugin): TabExecutor {
                 val config=YamlConfiguration.loadConfiguration(getConfigFile(chunk))
                 val x=config.getInt("chunk.location.x")
                 val z=config.getInt("chunk.location.z")
-                p0.sendMessage("${msg[1].replace("{list}", chunk)} &7[ &a${x shl 4 + 8}&f, &a${z shl 4 + 8} &f]", true)
+                p0.sendMessage("${msg[1].replace("{list}", chunk)} &7[ &a${x}&f, &a${z} &7]", true)
             }
         }
     }

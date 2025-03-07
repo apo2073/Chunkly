@@ -28,6 +28,7 @@ class PlayerChunkInteraction : Listener {
         val owner = chunk.persistentDataContainer.get(
             NamespacedKey(plugin, "owner"), PersistentDataType.STRING
         ) ?: return true
+        if (owner==player.uniqueId.toString() || player.isOp) return true
         val shareList = UserData.getMember(UUID.fromString(owner))
         return shareList.contains(player.uniqueId)
     }
@@ -53,7 +54,15 @@ class PlayerChunkInteraction : Listener {
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
-    fun PlayerBucketEvent.onBucket() {
+    fun PlayerBucketFillEvent.onBucket() {
+        if (!hasPermission(player.chunk, player)) isCancelled = true
+    }
+    @EventHandler(priority = EventPriority.HIGHEST)
+    fun PlayerBucketEmptyEvent.onBucket() {
+        if (!hasPermission(player.chunk, player)) isCancelled = true
+    }
+    @EventHandler(priority = EventPriority.HIGHEST)
+    fun PlayerBucketEntityEvent.onBucket() {
         if (!hasPermission(player.chunk, player)) isCancelled = true
     }
 
