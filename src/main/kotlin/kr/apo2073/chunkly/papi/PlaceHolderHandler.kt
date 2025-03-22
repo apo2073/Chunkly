@@ -16,15 +16,13 @@ class PlaceHolderHandler : PlaceholderExpansion() {
     override fun onPlaceholderRequest(player: Player?, params: String): String? {
         if (player == null) return null
 
-        val chunks = Chunks(player.x, player.z, player.world)
+        val chunks = Chunks(player.chunk)
         return when {
             params == "canbuy" -> chunks.canBuy().toString()
             params == "owner" -> chunks.getOwner() ?: translate("placeholder.owner.null")
             params.startsWith("share") -> {
-                println(params)
                 val parts = params.split("_")
                 if (parts.size != 3) return null
-                println(parts.joinToString("_"))
 
                 val ownerName = parts[1]
                 val index = parts[2].toIntOrNull() ?: return null

@@ -24,9 +24,7 @@ class Chunks {
     }
 
     fun getOwner():String? {
-        return chunk?.persistentDataContainer?.get(
-            NamespacedKey(plugin, "owner"), PersistentDataType.STRING
-        )
+        return getConfig().getString("chunk.owner")
     }
 
     fun setOwner(player: Player?) {
