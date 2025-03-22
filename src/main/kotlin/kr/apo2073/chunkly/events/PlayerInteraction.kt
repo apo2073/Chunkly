@@ -30,6 +30,7 @@ class PlayerInteraction:Listener {
         if (!(this.item?.isSimilar(chunkItem) ?: return)) return
         val chunk=player.chunk
         val chunks=Chunks(chunk)
+        isCancelled=true
         if (!chunks.canBuy()) {
             if (chunks.getOwner()==player.name) {
                 player.sendMessage(translate("chunk.its.yours"), true)

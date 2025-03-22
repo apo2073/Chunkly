@@ -21,16 +21,17 @@ repositories {
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT")
+//    compileOnly("io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:1.20.1-R0.1-SNAPSHOT")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     compileOnly("com.github.MilkBowl:VaultAPI:1.7.1")
-//    compileOnly("com.sk89q.worldguard:worldguard-bukkit:7.1.0-SNAPSHOT")
+    compileOnly("com.sk89q.worldguard:worldguard-bukkit:7.1.0-SNAPSHOT")
     implementation("com.comphenix.protocol:ProtocolLib:5.3.0")
     compileOnly("me.clip:placeholderapi:2.11.6")
 }
 
-//val targetJavaVersion = 21
-val targetJavaVersion = 17
+val targetJavaVersion = 21
+//val targetJavaVersion = 17
 kotlin {
     jvmToolchain(targetJavaVersion)
 }
@@ -49,6 +50,6 @@ tasks.processResources {
 }
 tasks.jar {
     archiveFileName.set("Chunkly.jar")
-//    destinationDirectory=file("C:\\Users\\PC\\Desktop\\Chunkly\\server\\plugins")
-    destinationDirectory=file("C:\\Users\\이태수\\Desktop\\Chunkly\\server\\plugins")
+    destinationDirectory=file("C:\\Users\\PC\\Desktop\\Test_Server\\plugins")
+//    destinationDirectory=file("C:\\Users\\이태수\\Desktop\\Chunkly\\server\\plugins")
 }

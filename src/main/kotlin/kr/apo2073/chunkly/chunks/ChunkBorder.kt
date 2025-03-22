@@ -18,12 +18,12 @@ class ChunkBorder {
                 for (player in Bukkit.getOnlinePlayers()) {
                     val file= getConfigFile("items")
                     val config= YamlConfiguration.loadConfiguration(file)
-                    val chunkItem= config.getItemStack("items") ?: return@Runnable
+                    val chunkItem= config.getItemStack("items") ?: continue
 
-                    if (!player.inventory.itemInMainHand.isSimilar(chunkItem)) return@Runnable
+                    if (!player.inventory.itemInMainHand.isSimilar(chunkItem)) continue
                     ChunkBorder().show(player, Particle.valueOf(
                         ChunkBorder().plugin.config
-                            .getString("particle")?.uppercase() ?: return@Runnable
+                            .getString("particle")?.uppercase() ?: continue
                     ))
                 }
             }, 9L, 9)

@@ -7,6 +7,7 @@ depend: [Vault]
 softdepend: [PlaceholderAPI, WorldGuard]
 commands:
   땅:
+    description: Chunkly 기본 명령어
 permissions:
   apo.chunkly.*:
     default: op

@@ -81,9 +81,11 @@ class ChunkCommand(plugin: JavaPlugin): TabExecutor {
             p0.sendMessage(translate("command.no.permission"), true)
             return
         }
-        p0.sendMessage(translate("command.ground.cant.buy"), true)
         val player=Bukkit.getPlayer(p3[1]) ?: return
         val amount=p3[2].toIntOrNull() ?: return
+        p0.sendMessage(translate("command.ground.give.item")
+            .replace("{player}", player.name)
+            .replace("{amount}", amount.toString()), true)
         item.amount=amount
         player.inventory.addItem(item)
     }
@@ -120,6 +122,7 @@ class ChunkCommand(plugin: JavaPlugin): TabExecutor {
         val config=YamlConfiguration.loadConfiguration(file)
         config.set("items", player.inventory.itemInMainHand)
         config.save(file)
+        player.sendMessage(translate("command.ground.set.item"), true)
     }
 
     private fun performList(p0: CommandSender) {
@@ -165,51 +168,61 @@ class ChunkCommand(plugin: JavaPlugin): TabExecutor {
     }
 
     private fun sendUsage(p0: CommandSender) {
-        val message= translate("command.ground.usage")
+        val message= if (p0.isOp) {
+            translate("command.ground.usage.op")
+        } else {translate("command.ground.usage.deop")}
             .split("|")
         message.forEach {
-            if (it.contains("아이템")) return@forEach
-            if (it.contains(""))
             p0.sendMessage(it, true)
         }
     }
 
     override fun onTabComplete(
-        p0: CommandSender,
-        p1: Command,
-        p2: String,
-        p3: Array<out String>
+        sender: CommandSender,
+        command: Command,
+        alias: String,
+        args: Array<out String>
     ): MutableList<String> {
-        val tab= mutableListOf<String>()
-        if (tab.isEmpty()) {
-            tab.addAll(arrayOf(
-//                "구매아이템설정",
-                "목록",
-//                "소유권이전",
-                "권한",
-                "아이템지급"
-            ))
-            if (p0.hasPermission("apo.chunkly.set.item")) tab.add("구매아이템설정")
+        val tab = mutableListOf<String>()
+
+        if (args.size == 1) {
+            val baseCommands = listOf("목록", "권한", "아이템지급")
+            tab.addAll(baseCommands)
+            if (sender.hasPermission("apo.chunkly.set.item")) {
+                tab.add("구매아이템설정")
+            }
+            return tab.filter { it.startsWith(args[0], ignoreCase = true) }.toMutableList()
         }
-        if (tab.size==1) {
-            if (p3[0]=="소유권이전") {
-                tab.addAll(UserData.getConfig((p0 as Player).uniqueId).getStringList("has-chunk"))
+
+        if (sender !is Player) return tab
+
+        if (args.size == 2) {
+            when (args[0]) {
+                "소유권이전" -> {
+                    tab.addAll(UserData.getConfig(sender.uniqueId).getStringList("has-chunk"))
+                }
+                "권한" -> {
+                    tab.addAll(listOf("추가", "제거"))
+                }
+                "아이템지급" -> {
+                    tab.addAll(plugin.server.onlinePlayers.map { it.name })
+                }
             }
-            if (p3[0]=="권한") {
-                tab.addAll(arrayOf(
-                    "추가",
-                    "제거"
-                ))
-            }
+            return tab.filter { it.startsWith(args[1], ignoreCase = true) }.toMutableList()
         }
-        if (tab.size==2) {
-            if (p3[0]=="소유권이전" || p3[0]=="권한") {
-                tab.addAll(plugin.server.onlinePlayers.map { it.name })
+
+        if (args.size == 3) {
+            when (args[0]) {
+                "소유권이전", "권한" -> {
+                    tab.addAll(plugin.server.onlinePlayers.map { it.name })
+                }
+                "아이템지급" -> {
+                    tab.addAll(listOf("1", "16", "32", "64"))
+                }
             }
-            if (p3[0]=="아이템지급") {
-                tab.addAll(arrayOf("1", "16", "32", "64"))
-            }
+            return tab.filter { it.startsWith(args[2], ignoreCase = true) }.toMutableList()
         }
+
         return tab
     }
 }
