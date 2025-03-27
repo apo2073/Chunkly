@@ -13,6 +13,7 @@ import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Bukkit
 import org.bukkit.Chunk
+import org.bukkit.Location
 import org.bukkit.NamespacedKey
 import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
@@ -41,6 +42,7 @@ class ChunkCommand(plugin: JavaPlugin): TabExecutor {
             when(p3[0]) {
                 "구매아이템설정"-> performItem(p0)
                 "목록"-> performList(p0)
+                "구매불가설정"-> performCanBuy(p0)
                 "reload"-> {
                     Bukkit.reloadData()
                 }
@@ -77,6 +79,15 @@ class ChunkCommand(plugin: JavaPlugin): TabExecutor {
             }
         }
         return true
+    }
+
+    private fun performCanBuy(player: Player) {
+        val chunks=Chunks(player.chunk)
+        val canbuy=chunks.canBuy()
+        chunks.setCanBuy(!canbuy)
+        player.sendMessage(translate(if (!canbuy) {
+            "command.ground.setcanbuy.false"
+        } else {"command.ground.setcanbuy.true"}), true)
     }
 
     private fun performGiveItem(p0: Player, p3: Array<out String>) {
@@ -167,20 +178,19 @@ class ChunkCommand(plugin: JavaPlugin): TabExecutor {
                                         val x = (chunkData.x shl 4) + 8
                                         val z = (chunkData.z shl 4) + 8
                                         val y = chunkData.world.getHighestBlockYAt(x, z)
-                                        "/minecraft:tp $x $y $z"
+                                        p0.teleport(Location(
+                                            chunkData.world, x.toDouble(), y.toDouble(), z.toDouble()
+                                        ))
+                                        ""
                                     }
                                 )
-                            )
-                        )
-                        .append(Component.text(" [제거]")
+                            )).append(Component.text(" [제거]")
                             .color(NamedTextColor.RED)
                             .clickEvent(
                                 ClickEvent.clickEvent(
                                     ClickEvent.Action.RUN_COMMAND,
                                     "/땅 removeChunk $chunk"
-                                )
-                            )
-                        )
+                                )))
                 ))
             } else {
                 p0.sendMessage("${msg[1].replace("{list}", chunk)} &7${"[ &a"+Chunks(
@@ -209,10 +219,10 @@ class ChunkCommand(plugin: JavaPlugin): TabExecutor {
         val tab = mutableListOf<String>()
 
         if (args.size == 1) {
-            val baseCommands = listOf("목록", "권한", "아이템지급")
+            val baseCommands = listOf("목록", "권한")
             tab.addAll(baseCommands)
             if (sender.hasPermission("apo.chunkly.set.item")) {
-                tab.add("구매아이템설정")
+                tab.addAll(listOf("구매아이템설정", "아이템지급", "구매불가설정"))
             }
             return tab.filter { it.startsWith(args[0], ignoreCase = true) }.toMutableList()
         }

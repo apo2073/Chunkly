@@ -71,4 +71,20 @@ class Chunks {
     fun getChunk(): Chunk? = chunk
 
     fun canBuy():Boolean = getOwner()==null
+    fun setCanBuy(boolean: Boolean) {
+        if (boolean) {
+            chunk?.persistentDataContainer?.set(
+                NamespacedKey(plugin, "owner"), PersistentDataType.STRING, "none")
+            val config=getConfig()
+            config.set("chunk.owner", "cantbuy")
+            config.set("chunk.key", chunk?.chunkKey)
+            config.set("chunk.location.x", chunk?.x)
+            config.set("chunk.location.z", chunk?.z)
+            config.set("chunk.world", chunk?.world?.uid.toString())
+            config.save(file)
+        } else {
+            chunk?.persistentDataContainer?.remove(NamespacedKey(plugin, "owner"))
+            file.delete()
+        }
+    }
 }

@@ -29,6 +29,12 @@ class UserData {
             setValue("user.has-chunk", list, uuid)
         }
 
+        fun removeChunk(chunkKey:String, uuid: UUID) {
+            val list= getConfig(uuid).getStringList("user.has-chunk")
+            list.remove(chunkKey)
+            setValue("user.has-chunk", list, uuid)
+        }
+
         fun getMember(uuid:UUID): List<UUID> {
             val list= getConfig(uuid).getStringList("user.share-permissions")
             return list.map { UUID.fromString(it) }

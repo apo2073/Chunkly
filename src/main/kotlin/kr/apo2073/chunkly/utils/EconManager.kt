@@ -6,8 +6,11 @@ import kr.apo2073.chunkly.data.UserData
 import kr.apo2073.chunkly.utils.LangManager.translate
 import org.bukkit.Bukkit
 import org.bukkit.Chunk
+import org.bukkit.NamespacedKey
 import org.bukkit.OfflinePlayer
 import org.bukkit.entity.Player
+import org.bukkit.persistence.PersistentDataType
+import java.util.*
 
 object EconManager {
     private val plugin=Chunkly.plugin
@@ -44,11 +47,16 @@ object EconManager {
         var price= plugin.config.getDouble("chunk-price.each.${chunk.world.name}", 0.0)
         if (price==0.0 || price==null) price= plugin.config.getDouble("chunk-price.default")
         val chunks=Chunks(chunk)
+        UserData.removeChunk(
+            chunk.chunkKey.toString(), UUID.fromString(
+            chunk.persistentDataContainer.get(NamespacedKey(plugin, "owner"), PersistentDataType.STRING)
+        ))
+        UserData.addChunk(chunk.chunkKey.toString(), to?.uniqueId ?: return)
         chunks.setOwner(to)
         val owner= Bukkit.getPlayer(chunks.getOwner() ?: return) ?: return
-        if (to != null) takeMoney(to, price)
+        takeMoney(to, price)
         giveMoney(owner, price)
-        to?.sendMessage(translate("chunk.own.bought"), true)
+        to.sendMessage(translate("chunk.own.bought"), true)
         owner.sendMessage(translate("chunk.own.to.other").replace("{to}", to?.name ?: return), true)
     }
 }
