@@ -24,8 +24,8 @@ class Chunkly : JavaPlugin() {
         try{
             saveDefaultConfig()
             saveResource("lang/ko.json", true)
-            saveResource("chunkdata/example-chunk.yml", true)
-            saveResource("userdata/example-user.yml", true)
+//            saveResource("chunkdata/example-chunk.yml", true)
+//            saveResource("userdata/example-user.yml", true)
 
             if (!setupEconomy() ) {
                 logger.severe(translate("plugin.disable.cause.vault"));

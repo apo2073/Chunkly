@@ -27,6 +27,7 @@ class PlayerInteraction:Listener {
         val config=YamlConfiguration.loadConfiguration(file)
         val chunkItem= config.getItemStack("items") ?: return
 
+        if (!player.hasPermission("apo.chunkly.buy")) return
         if (!(this.item?.isSimilar(chunkItem) ?: return)) return
         val chunk=player.chunk
         val chunks=Chunks(chunk)
@@ -44,7 +45,7 @@ class PlayerInteraction:Listener {
             "bought-limit.${player.world.name}",
             plugin.config.getInt("bought-limit.default")
         )
-        if (playerHasChunk+1>maxCount) {
+        if (playerHasChunk+2>maxCount) {
             player.sendMessage(translate("chunk.cant.buy.more"), true)
             return
         }

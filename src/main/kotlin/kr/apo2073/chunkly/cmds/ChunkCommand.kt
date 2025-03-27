@@ -40,6 +40,9 @@ class ChunkCommand(plugin: JavaPlugin): TabExecutor {
             when(p3[0]) {
                 "구매아이템설정"-> performItem(p0)
                 "목록"-> performList(p0)
+                "reload"-> {
+                    Bukkit.reloadData()
+                }
                 else-> sendUsage(p0)
             }
         }
@@ -59,6 +62,7 @@ class ChunkCommand(plugin: JavaPlugin): TabExecutor {
             EconManager.sellChunk(chunk, null)
             chunk.persistentDataContainer.remove(NamespacedKey(plugin, "owner"))
             file.delete()
+            performList(p0)
         }
         if (p3.size==2) {
             when(p3[0]) {
@@ -81,6 +85,7 @@ class ChunkCommand(plugin: JavaPlugin): TabExecutor {
             p0.sendMessage(translate("command.no.permission"), true)
             return
         }
+        p0.sendMessage(translate("command.ground.cant.buy"), true)
         val player=Bukkit.getPlayer(p3[1]) ?: return
         val amount=p3[2].toIntOrNull() ?: return
         p0.sendMessage(translate("command.ground.give.item")
@@ -149,20 +154,37 @@ class ChunkCommand(plugin: JavaPlugin): TabExecutor {
 //            p0.sendMessage(msg[1].replace("{list}", chunk), true)
             if (p0.isOp) {
                 p0.sendMessage(prefix.append(
-                    Component.text(msg[1].replace("{list}",
-                        chunk.replace(".yml", "")))
+                    Component.text(msg[1].replace("{list}", chunk.replace(".yml", "")) + " [ " +
+                            Chunks(getChunk(chunk.toLong()) ?: return@forEach).getOwner() + " ]")
+                        .append(Component.text(" [TP]")
+                            .color(NamedTextColor.GRAY)
+                            .clickEvent(
+                                ClickEvent.clickEvent(
+                                    ClickEvent.Action.RUN_COMMAND,
+                                    run {
+                                        val chunkData = getChunk(chunk.toLong()) ?: return@run "/minecraft:tp 0 0 0" // 청크가 없으면 기본값 처리
+                                        val x = (chunkData.x shl 4) + 8
+                                        val z = (chunkData.z shl 4) + 8
+                                        val y = chunkData.world.getHighestBlockYAt(x, z)
+                                        "/minecraft:tp $x $y $z"
+                                    }
+                                )
+                            )
+                        )
                         .append(Component.text(" [제거]")
                             .color(NamedTextColor.RED)
                             .clickEvent(
                                 ClickEvent.clickEvent(
                                     ClickEvent.Action.RUN_COMMAND,
                                     "/땅 removeChunk $chunk"
-                                )))))
+                                )
+                            )
+                        )
+                ))
             } else {
-                val config=YamlConfiguration.loadConfiguration(getConfigFile(chunk))
-                val x=config.getInt("chunk.location.x")
-                val z=config.getInt("chunk.location.z")
-                p0.sendMessage("${msg[1].replace("{list}", chunk)} &7[ &a${x}&f, &a${z} &7]", true)
+                p0.sendMessage("${msg[1].replace("{list}", chunk)} &7${"[ &a"+Chunks(
+                    getChunk(chunk.toLong()) ?: return@forEach
+                ).getOwner() + "&7]"}", true)
             }
         }
     }
@@ -224,5 +246,17 @@ class ChunkCommand(plugin: JavaPlugin): TabExecutor {
         }
 
         return tab
+    }
+
+    private fun getChunk(chunkKey:Long): Chunk? {
+        val file= File("${Chunkly.plugin.dataFolder}/chunkdata", chunkKey.toString())
+        if (!file.exists()) return null
+        val config= YamlConfiguration.loadConfiguration(file)
+        val chunk=Bukkit
+            .getWorld(UUID.fromString(config.getString("chunk.world")))?.getChunkAt(
+                config.getInt("chunk.location.x"),
+                config.getInt("chunk.location.z")
+            ) ?: return null
+        return chunk
     }
 }
