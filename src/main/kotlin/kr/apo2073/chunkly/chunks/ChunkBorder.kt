@@ -10,33 +10,40 @@ import org.bukkit.entity.Player
 import org.bukkit.persistence.PersistentDataType
 
 class ChunkBorder {
-    private val plugin=Chunkly.plugin
+    private val plugin = Chunkly.plugin
 
     companion object {
         fun start() {
             Bukkit.getScheduler().runTaskTimer(ChunkBorder().plugin, Runnable {
                 for (player in Bukkit.getOnlinePlayers()) {
-                    val file= getConfigFile("items")
-                    val config= YamlConfiguration.loadConfiguration(file)
-                    val chunkItem= config.getItemStack("items") ?: continue
+                    Bukkit.getScheduler().runTaskAsynchronously(ChunkBorder().plugin, Runnable {
+                        val file = getConfigFile("items")
+                        val config = YamlConfiguration.loadConfiguration(file)
+                        val chunkItem = config.getItemStack("items") ?: return@Runnable
 
-                    if (!player.inventory.itemInMainHand.isSimilar(chunkItem)) continue
-                    ChunkBorder().show(player, Particle.valueOf(
-                        ChunkBorder().plugin.config
-                            .getString("particle")?.uppercase() ?: continue
-                    ))
+                        val itemInHand = player.inventory.itemInMainHand
+                        if (!itemInHand.isSimilar(chunkItem)) return@Runnable
+
+                        val particle = Particle.valueOf(
+                            ChunkBorder().plugin.config
+                                .getString("particle")?.uppercase() ?: return@Runnable
+                        )
+
+                        Bukkit.getScheduler().runTask(ChunkBorder().plugin, Runnable {
+                            ChunkBorder().show(player, particle)
+                        })
+                    })
                 }
             }, 9L, 9)
         }
-
     }
 
-    private fun show(player:Player, particle: Particle) {
+    private fun show(player: Player, particle: Particle) {
         if (
             player.chunk.persistentDataContainer.get(
                 NamespacedKey(Chunkly.plugin, "owner"),
                 PersistentDataType.STRING
-            )!=null
+            ) != null
         ) return
 
         val loc = player.location

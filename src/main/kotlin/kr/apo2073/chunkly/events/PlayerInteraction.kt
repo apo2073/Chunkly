@@ -19,75 +19,93 @@ import org.bukkit.event.player.PlayerMoveEvent
 import org.bukkit.event.world.ChunkLoadEvent
 import java.util.*
 
-class PlayerInteraction:Listener {
-    private val plugin=Chunkly.plugin
+class PlayerInteraction : Listener {
+    private val plugin = Chunkly.plugin
+
     @EventHandler
     fun PlayerInteractEvent.onInteraction() {
-        val file=getConfigFile("items")
-        val config=YamlConfiguration.loadConfiguration(file)
-        val chunkItem= config.getItemStack("items") ?: return
-
         if (!player.hasPermission("apo.chunkly.buy")) return
-        if (!(this.item?.isSimilar(chunkItem) ?: return)) return
-        val chunk=player.chunk
-        val chunks=Chunks(chunk)
-        isCancelled=true
-        if (!chunks.canBuy()) {
-            if (chunks.getOwner()==player.name) {
-                player.sendMessage(translate("chunk.its.yours"), true)
-                return
-            }
-            player.sendMessage(translate("command.ground.cant.buy"), true)
-            return
-        }
-        val playerHasChunk=UserData.countChunkInWorld(player.world.uid, player.uniqueId)
-        val maxCount=plugin.config.getInt(
-            "bought-limit.${player.world.name}",
-            plugin.config.getInt("bought-limit.default")
-        )
-        if (playerHasChunk+2>maxCount) {
-            player.sendMessage(translate("chunk.cant.buy.more"), true)
-            return
-        }
-        EconManager.buyChunk(chunk, player)
+        val itemInHand = this.item ?: return
+
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, Runnable {
+            val file = getConfigFile("items")
+            val config = YamlConfiguration.loadConfiguration(file)
+            val chunkItem = config.getItemStack("items") ?: return@Runnable
+
+            if (!itemInHand.isSimilar(chunkItem)) return@Runnable
+
+            val chunk = player.chunk
+            val chunks = Chunks(chunk)
+
+            Bukkit.getScheduler().runTask(plugin, Runnable {
+                isCancelled = true
+                if (!chunks.canBuy()) {
+                    if (chunks.getOwner() == player.name) {
+                        player.sendMessage(translate("chunk.its.yours"), true)
+                    } else {
+                        player.sendMessage(translate("command.ground.cant.buy"), true)
+                    }
+                    return@Runnable
+                }
+                UserData.countChunkInWorld(player.world.uid, player.uniqueId) {
+                    val maxCount = plugin.config.getInt(
+                        "bought-limit.${player.world.name}",
+                        plugin.config.getInt("bought-limit.default")
+                    )
+                    if (it + 2 > maxCount) {
+                        player.sendMessage(translate("chunk.cant.buy.more"), true)
+                        return@countChunkInWorld
+                    }
+                    EconManager.buyChunk(chunk, player)
+                }
+            })
+        })
     }
 
     @EventHandler
     fun ChunkLoadEvent.onLoad() {
-        val chunks= Chunks(chunk)
-        val members=chunks.getMembers()?.map { Bukkit.getPlayer(it) ?: return } ?: return
-        members.forEach {
-            it.addAttachment(plugin)
-                .setPermission(
-                    "apo.chunkly.${chunks.getChunk()?.chunkKey ?: return}",
-                    true
-                )
-        }
+        val chunks = Chunks(chunk)
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, Runnable {
+            chunks.getMembers() {
+                val members=it?.mapNotNull { Bukkit.getPlayer(it) } ?: return@getMembers
+                Bukkit.getScheduler().runTask(plugin, Runnable {
+                    members.forEach {
+                        it.addAttachment(plugin)
+                            .setPermission(
+                                "apo.chunkly.${chunks.getChunk()?.chunkKey ?: return@Runnable}",
+                                true
+                            )
+                    }
+                })
+            }
+        })
     }
 
     @EventHandler
     fun PlayerJoinEvent.onJoin() {
-        val uuid=player.uniqueId
-
-        UserData.setValue("user.name", player.name, uuid)
-        UserData.setValue("user.uuid", uuid.toString(), uuid)
+        val uuid = player.uniqueId
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, Runnable {
+            UserData.setValue("user.name", player.name, uuid)
+            UserData.setValue("user.uuid", uuid.toString(), uuid)
+        })
     }
 
-    private var playerChunk= mutableMapOf<UUID, Chunk?>()
+    private var playerChunk = mutableMapOf<UUID, Chunk?>()
+
     @EventHandler
     fun PlayerMoveEvent.onMove() {
-        var chunk=playerChunk[player.uniqueId]
-        if (chunk!=player.chunk) {
+        var chunk = playerChunk[player.uniqueId]
+        if (chunk != player.chunk) {
             Bukkit.getScheduler().runTask(plugin, Runnable {
-                val event=PlayerChunkChangeEvent(
+                val event = PlayerChunkChangeEvent(
                     chunk,
                     player.chunk,
                     player
                 )
                 Bukkit.getPluginManager().callEvent(event)
             })
-            chunk=player.chunk
-            playerChunk[player.uniqueId]=chunk
+            chunk = player.chunk
+            playerChunk[player.uniqueId] = chunk
         }
     }
 }

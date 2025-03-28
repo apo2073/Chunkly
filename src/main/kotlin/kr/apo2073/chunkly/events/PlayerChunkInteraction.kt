@@ -4,6 +4,7 @@ import com.destroystokyo.paper.event.player.*
 import io.papermc.paper.event.player.*
 import kr.apo2073.chunkly.Chunkly
 import kr.apo2073.chunkly.data.UserData
+import org.bukkit.Bukkit
 import org.bukkit.Chunk
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
@@ -24,117 +25,170 @@ import java.util.*
 class PlayerChunkInteraction : Listener {
     private val plugin = Chunkly.plugin
 
-    private fun hasPermission(chunk: Chunk, player: Player): Boolean {
+    private fun hasPermission(chunk: Chunk, player: Player, callback: (Boolean) -> Unit) {
         val owner = chunk.persistentDataContainer.get(
             NamespacedKey(plugin, "owner"), PersistentDataType.STRING
-        ) ?: return true
-        if (owner==player.uniqueId.toString() || player.isOp) return true
-        val shareList = UserData.getMember(UUID.fromString(owner))
-        return shareList.contains(player.uniqueId)
+        )
+        if (owner == null) {
+            callback(true)
+            return
+        }
+        if (owner == player.uniqueId.toString() || player.isOp) {
+            callback(true)
+            return
+        }
+
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, Runnable {
+            UserData.getMember(UUID.fromString(owner)) {
+                val hasPermission = it.contains(player.uniqueId)
+                Bukkit.getScheduler().runTask(plugin, Runnable {
+                    callback(hasPermission)
+                })
+            }
+        })
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     fun PlayerInteractEvent.onInteraction() {
-        if (!hasPermission(player.chunk, player)) isCancelled = true
+        hasPermission(player.chunk, player) { allowed ->
+            if (!allowed) isCancelled = true
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     fun PlayerHarvestBlockEvent.onHarvest() {
-        if (!hasPermission(player.chunk, player)) isCancelled = true
+        hasPermission(player.chunk, player) { allowed ->
+            if (!allowed) isCancelled = true
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     fun PlayerAttemptPickupItemEvent.onPickUp() {
-        if (!hasPermission(player.chunk, player)) isCancelled = true
+        hasPermission(player.chunk, player) { allowed ->
+            if (!allowed) isCancelled = true
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     fun PlayerBedEnterEvent.onEnter() {
-        if (!hasPermission(player.chunk, player)) isCancelled = true
+        hasPermission(player.chunk, player) { allowed ->
+            if (!allowed) isCancelled = true
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     fun PlayerBucketFillEvent.onBucket() {
-        if (!hasPermission(player.chunk, player)) isCancelled = true
+        hasPermission(player.chunk, player) { allowed ->
+            if (!allowed) isCancelled = true
+        }
     }
+
     @EventHandler(priority = EventPriority.HIGHEST)
     fun PlayerBucketEmptyEvent.onBucket() {
-        if (!hasPermission(player.chunk, player)) isCancelled = true
+        hasPermission(player.chunk, player) { allowed ->
+            if (!allowed) isCancelled = true
+        }
     }
+
     @EventHandler(priority = EventPriority.HIGHEST)
     fun PlayerBucketEntityEvent.onBucket() {
-        if (!hasPermission(player.chunk, player)) isCancelled = true
+        hasPermission(player.chunk, player) { allowed ->
+            if (!allowed) isCancelled = true
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     fun PlayerLaunchProjectileEvent.onLaunch() {
-        if (!hasPermission(player.chunk, player)) isCancelled = true
+        hasPermission(player.chunk, player) { allowed ->
+            if (!allowed) isCancelled = true
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     fun PlayerItemFrameChangeEvent.onFrameChange() {
-        if (!hasPermission(player.chunk, player)) isCancelled = true
+        hasPermission(player.chunk, player) { allowed ->
+            if (!allowed) isCancelled = true
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     fun PlayerSetSpawnEvent.onSetSpawn() {
-        if (!hasPermission(player.chunk, player)) isCancelled = true
+        hasPermission(player.chunk, player) { allowed ->
+            if (!allowed) isCancelled = true
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     fun PlayerDropItemEvent.onDrop() {
-        if (!hasPermission(player.chunk, player)) isCancelled = true
+        hasPermission(player.chunk, player) { allowed ->
+            if (!allowed) isCancelled = true
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     fun PlayerItemMendEvent.onMend() {
-        if (!hasPermission(player.chunk, player)) isCancelled = true
+        hasPermission(player.chunk, player) { allowed ->
+            if (!allowed) isCancelled = true
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     fun EntityPlaceEvent.onPlace() {
         val entityPlayer = player ?: return
-        if (!hasPermission(entityPlayer.chunk, entityPlayer)) isCancelled = true
+        hasPermission(entityPlayer.chunk, entityPlayer) { allowed ->
+            if (!allowed) isCancelled = true
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     fun PlayerAdvancementCriterionGrantEvent.onAdvancementGrant() {
-        if (!hasPermission(player.chunk, player)) isCancelled = true
+        hasPermission(player.chunk, player) { allowed ->
+            if (!allowed) isCancelled = true
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     fun PlayerChangeBeaconEffectEvent.onBeaconChange() {
-        if (!hasPermission(player.chunk, player)) isCancelled = true
+        hasPermission(player.chunk, player) { allowed ->
+            if (!allowed) isCancelled = true
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     fun ProjectileHitEvent.onProjectileHit() {
         val shooter = entity.shooter as? Player ?: return
-        if (!hasPermission(shooter.chunk, shooter)) isCancelled = true
+        hasPermission(shooter.chunk, shooter) { allowed ->
+            if (!allowed) isCancelled = true
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     fun BlockBreakEvent.onBlockBreak() {
-        if (!hasPermission(player.chunk, player)) isCancelled = true
+        hasPermission(player.chunk, player) { allowed ->
+            if (!allowed) isCancelled = true
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     fun BlockPlaceEvent.onBlockPlace() {
-        if (!hasPermission(player.chunk, player)) isCancelled = true
+        hasPermission(player.chunk, player) { allowed ->
+            if (!allowed) isCancelled = true
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     fun EntityDamageByEntityEvent.onEntityDamage() {
         val damaged = damager as? Player ?: return
-        if (!hasPermission(damaged.chunk, damaged)) isCancelled = true
+        hasPermission(damaged.chunk, damaged) { allowed ->
+            if (!allowed) isCancelled = true
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     fun EntityExplodeEvent.onEntityExplode() {
-        if (!hasPermission(location.chunk, location.world.players.firstOrNull {
-            it.location.chunk == location.chunk
-        } ?: return)) {
-            isCancelled = true
+        val player = location.world.players.firstOrNull { it.location.chunk == location.chunk } ?: return
+        hasPermission(location.chunk, player) { allowed ->
+            if (!allowed) isCancelled = true
         }
     }
 }

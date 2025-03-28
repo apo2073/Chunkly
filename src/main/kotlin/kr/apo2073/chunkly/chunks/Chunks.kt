@@ -45,21 +45,27 @@ class Chunks {
     }
 
     fun addMember(player: Player) {
-        val list=UserData.getConfig(
+        UserData.getConfig(
             Bukkit.getPlayer(getOwner().toString())?.uniqueId ?: return
-        ).getStringList("user.share-permissions")
-        list.add(player.name)
-        UserData.setValue(
-            "user.share-permissions", list,
-            Bukkit.getPlayer(getOwner() ?: return)?.uniqueId ?: return
-        )
+        ) {
+            val list=it.getStringList("user.share-permissions")
+            list.add(player.name)
+            UserData.setValue(
+                "user.share-permissions", list,
+                Bukkit.getPlayer(getOwner() ?: return@getConfig)?.uniqueId ?: return@getConfig
+            )
+        }
     }
 
-    fun getMembers(): MutableList<String>? {
-//        return getConfig().getStringList("members")
-        return UserData.getConfig(
-            Bukkit.getPlayer(getOwner().toString())?.uniqueId ?: return null
-        ).getStringList("user.share-permissions")
+    fun getMembers(callback: (MutableList<String>?) -> Unit) {
+        val ownerPlayer = Bukkit.getPlayer(getOwner().toString()) ?: run {
+            callback(null)
+            return
+        }
+        UserData.getConfig(ownerPlayer.uniqueId) { config ->
+            val members = config.getStringList("user.share-permissions").toMutableList()
+            callback(members)
+        }
     }
 
     private var file:File
@@ -72,7 +78,7 @@ class Chunks {
 
     fun canBuy():Boolean = getOwner()==null
     fun setCanBuy(boolean: Boolean) {
-        if (boolean) {
+        if (!boolean) {
             chunk?.persistentDataContainer?.set(
                 NamespacedKey(plugin, "owner"), PersistentDataType.STRING, "none")
             val config=getConfig()

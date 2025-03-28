@@ -26,12 +26,31 @@ class PlaceHolderHandler : PlaceholderExpansion() {
 
                 val ownerName = parts[1]
                 val index = parts[2].toIntOrNull() ?: return null
-
                 val owner = Bukkit.getOfflinePlayer(ownerName)
-                val shareList = UserData.getConfig(owner.uniqueId).getStringList("user.share-permissions")
-                shareList.getOrNull(index-1) ?: "N/A"
+
+                val cacheKey = "share_${owner.uniqueId}_$index"
+                val cachedValue = PlaceholderCache.get(cacheKey)
+                if (cachedValue != null) return cachedValue
+
+                Bukkit.getScheduler().runTaskAsynchronously(Chunkly.plugin, Runnable {
+                    UserData.getConfig(owner.uniqueId) { config ->
+                        val shareList = config.getStringList("user.share-permissions")
+                        val value = shareList.getOrNull(index - 1) ?: "N/A"
+                        PlaceholderCache.set(cacheKey, value)
+                    }
+                })
+                ""
             }
             else -> null
         }
+    }
+}
+
+object PlaceholderCache {
+    private val cache = mutableMapOf<String, String>()
+
+    fun get(key: String): String? = cache[key]
+    fun set(key: String, value: String) {
+        cache[key] = value
     }
 }

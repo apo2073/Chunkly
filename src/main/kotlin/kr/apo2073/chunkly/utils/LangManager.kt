@@ -6,21 +6,31 @@ import kr.apo2073.chunkly.Chunkly
 import java.io.File
 
 object LangManager {
-    private val plugin=Chunkly.plugin
-    private var language= plugin.config.getString("lang", "ko")
-    private var langFile=File("${plugin.dataFolder}/lang", "${language}.json")
+    private val plugin = Chunkly.plugin
+    private var language = plugin.config.getString("lang", "ko")
+    private var langFile = File("${plugin.dataFolder}/lang", "${language}.json")
+    private val langJson: JsonObject
+
     init {
         plugin.reloadConfig()
-        language= plugin.config.getString("lang", "ko")
-        langFile= File("${plugin.dataFolder}/lang", "${language}.json")
+        language = plugin.config.getString("lang", "ko") ?: "ko"
+        langFile = File("${plugin.dataFolder}/lang", "${language}.json")
+        langJson = try {
+            val lang = langFile.readText()
+            Gson().fromJson(lang, JsonObject::class.java)
+        } catch (e: Exception) {
+            JsonObject()
+        }
     }
-    fun translate(text:String):String {
-        try {
-            val lang= langFile.readText()
-            val langJson= Gson().fromJson(lang, JsonObject::class.java)
-            return langJson.get(text).asString
-                .replace("{lang}", language.toString())
-                .replace("&", "§")
-        } catch (e: Exception) { return text }
+
+    fun translate(text: String): String {
+        return try {
+            langJson.get(text)?.asString
+                ?.replace("{lang}", language.toString())
+                ?.replace("&", "§")
+                ?: text
+        } catch (e: Exception) {
+            text
+        }
     }
 }
