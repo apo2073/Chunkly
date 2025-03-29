@@ -13,7 +13,3 @@ fun org.bukkit.command.CommandSender.sendMessage(
         kr.apo2073.chunkly.utils.prefix.append(message.replace("&", "§").str2Component())
     }else {message.str2Component()})
 }
-
-fun asynchronously(code:()->Unit) {
-    Bukkit.getScheduler().runTaskAsynchronously(Chunkly.plugin, Runnable { code })
-}

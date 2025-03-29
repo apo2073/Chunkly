@@ -35,7 +35,10 @@ class UserData {
             getConfig(uuid) { config ->
                 val list = config.getStringList("user.has-chunk")
                 list.add(chunkKey)
-                setValue("user.has-chunk", list, uuid)
+                val file = File("${Chunkly.plugin.dataFolder}/userdata", "$uuid.yml")
+                val config = YamlConfiguration.loadConfiguration(file)
+                config.set("user.has-chunk", list)
+                config.save(file)
             }
         }
 
@@ -43,7 +46,10 @@ class UserData {
             getConfig(uuid) { config ->
                 val list = config.getStringList("user.has-chunk")
                 list.remove(chunkKey)
-                setValue("user.has-chunk", list, uuid)
+                val file = File("${Chunkly.plugin.dataFolder}/userdata", "$uuid.yml")
+                val config = YamlConfiguration.loadConfiguration(file)
+                config.set("user.has-chunk", list)
+                config.save(file)
             }
         }
 

@@ -40,7 +40,7 @@ class Chunks {
         config.set("chunk.location.x", chunk?.x)
         config.set("chunk.location.z", chunk?.z)
         config.set("chunk.world", chunk?.world?.uid.toString())
-        config.set("chunk.owner", player?.name)
+        config.set("chunk.owner", player.name)
         config.save(file)
     }
 

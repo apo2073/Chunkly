@@ -117,5 +117,6 @@ runs/
 
 # Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
 !gradle-wrapper.jar
+!**/worldguard-bukkit-7.1.0-20240916.181108-14.jar
 
 server/

@@ -17,6 +17,6 @@ permissions:
       apo.chunkly.set.item:
         default: op
       apo.chunkly.buy:
-        default: op
+        default: not op
 libraries:
   - org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.1.0

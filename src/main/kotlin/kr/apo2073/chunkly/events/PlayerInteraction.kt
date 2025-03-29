@@ -1,7 +1,9 @@
 package kr.apo2073.chunkly.events
 
+import com.sk89q.worldguard.protection.regions.ProtectedRegion
 import kr.apo2073.chunkly.Chunkly
 import kr.apo2073.chunkly.chunks.Chunks
+import kr.apo2073.chunkly.chunks.RegionsInChunks
 import kr.apo2073.chunkly.data.UserData
 import kr.apo2073.chunkly.events.onChunk.PlayerChunkChangeEvent
 import kr.apo2073.chunkly.utils.ConfigManager.getConfigFile
@@ -17,6 +19,7 @@ import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerMoveEvent
 import org.bukkit.event.world.ChunkLoadEvent
+import java.io.File
 import java.util.*
 
 class PlayerInteraction : Listener {
@@ -37,6 +40,20 @@ class PlayerInteraction : Listener {
             val chunk = player.chunk
             val chunks = Chunks(chunk)
 
+            fun proceedWithPurchase() {
+                UserData.countChunkInWorld(player.world.uid, player.uniqueId) { count ->
+                    val maxCount = plugin.config.getInt(
+                        "bought-limit.${player.world.name}",
+                        plugin.config.getInt("bought-limit.default")
+                    )
+                    if (count + 2 > maxCount) {
+                        player.sendMessage(translate("chunk.cant.buy.more"), true)
+                        return@countChunkInWorld
+                    }
+                    EconManager.buyChunk(chunk, player)
+                }
+            }
+
             Bukkit.getScheduler().runTask(plugin, Runnable {
                 isCancelled = true
                 if (!chunks.canBuy()) {
@@ -47,16 +64,20 @@ class PlayerInteraction : Listener {
                     }
                     return@Runnable
                 }
-                UserData.countChunkInWorld(player.world.uid, player.uniqueId) {
-                    val maxCount = plugin.config.getInt(
-                        "bought-limit.${player.world.name}",
-                        plugin.config.getInt("bought-limit.default")
-                    )
-                    if (it + 2 > maxCount) {
-                        player.sendMessage(translate("chunk.cant.buy.more"), true)
-                        return@countChunkInWorld
+
+                if (Bukkit.getPluginManager().getPlugin("WorldGuard") != null) {
+                    RegionsInChunks(plugin).getRegionsInChunkAsync(chunk) { regions ->
+                        val block = plugin.config.getStringList("cant-bought-region")
+                        for (region in regions) {
+                            if (region.id in block) {
+                                player.sendMessage(translate("chunk.cant.buy.region"), true)
+                                return@getRegionsInChunkAsync
+                            }
+                        }
+                        proceedWithPurchase()
                     }
-                    EconManager.buyChunk(chunk, player)
+                } else {
+                    proceedWithPurchase()
                 }
             })
         })
@@ -85,8 +106,11 @@ class PlayerInteraction : Listener {
     fun PlayerJoinEvent.onJoin() {
         val uuid = player.uniqueId
         Bukkit.getScheduler().runTaskAsynchronously(plugin, Runnable {
-            UserData.setValue("user.name", player.name, uuid)
-            UserData.setValue("user.uuid", uuid.toString(), uuid)
+            val file = File("${Chunkly.plugin.dataFolder}/userdata", "$uuid.yml")
+            val config = YamlConfiguration.loadConfiguration(file)
+            config.set("user.name", player.name)
+            config.set("user.uuid", uuid.toString())
+            config.save(file)
         })
     }
 

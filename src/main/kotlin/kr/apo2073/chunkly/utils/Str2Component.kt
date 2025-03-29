@@ -7,7 +7,7 @@ import net.kyori.adventure.text.format.TextColor
 import net.kyori.adventure.text.format.TextDecoration
 
 fun String.str2Component(): Component {
-    return Str2Component.toComponent(this)
+    return Str2Component.toComponent(this.replace("&", "§"))
 }
 
 object Str2Component {

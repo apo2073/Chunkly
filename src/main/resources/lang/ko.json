@@ -12,7 +12,7 @@
   "command.ground.give.item": "아이템을 &e{player}&f에게 &a{amount}&f만큼 지급했습니다",
   "command.ground.force.sell": "해당 청크를 강제로 판매했습니다.",
   "command.ground.force.sell.owner": "해당 청크가 강제로 판매됐습니다.",
-  "command.ground.list": "&a청크 &f리스르| ⌊ &b{list}",
+  "command.ground.list": "&a청크 &f목록| ⌊ &b{list}",
   "command.ground.list.no": "&a청크&f를 보유하고 있지 않습니다.",
   "command.ground.member.add": "플레이어 &e{player}&f에게 권한을 공유했습니다",
   "command.ground.member.remove": "플레이어 &e{player}&f의 권한을 제거했습니다",
@@ -25,6 +25,7 @@
   "chunk.own.bought": "해당 청크의 &a소유권&f을 옮겨 받았습니다",
   "chunk.its.yours": "해당 청크는 이미 당신의 소유입니다.",
   "chunk.cant.buy.more": "해당 &e월드&f의 &c최대 구매 가능 수&f를 넘었습니다.",
+  "chunk.cant.buy.region": "이 구역은 구매 할 수 &c없습니다",
 
   "chunk.cant.interaction": "해당 청크는 소유자가 존재합니다.",
 

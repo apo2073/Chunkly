@@ -6,9 +6,9 @@ import kr.apo2073.chunkly.data.UserData
 import kr.apo2073.chunkly.utils.ConfigManager.getConfigFile
 import kr.apo2073.chunkly.utils.EconManager
 import kr.apo2073.chunkly.utils.LangManager.translate
-import kr.apo2073.chunkly.utils.asynchronously
 import kr.apo2073.chunkly.utils.prefix
 import kr.apo2073.chunkly.utils.sendMessage
+import kr.apo2073.chunkly.utils.str2Component
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.format.NamedTextColor
@@ -24,6 +24,7 @@ import org.bukkit.entity.Player
 import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
 import java.util.*
+import kotlin.collections.mutableListOf
 
 class ChunkCommand(plugin: JavaPlugin) : TabExecutor {
     private val plugin = Chunkly.plugin
@@ -47,7 +48,7 @@ class ChunkCommand(plugin: JavaPlugin) : TabExecutor {
                 "구매아이템설정" -> performItem(p0)
                 "목록" -> performList(p0)
                 "구매불가설정" -> performCanBuy(p0)
-                "reload" -> asynchronously { Bukkit.reloadData() }
+                "reload" -> Bukkit.getScheduler().runTaskAsynchronously(Chunkly.plugin, Runnable { Bukkit.reloadData() })
                 else -> sendUsage(p0)
             }
             2 -> when (p3[0]) {
@@ -64,7 +65,9 @@ class ChunkCommand(plugin: JavaPlugin) : TabExecutor {
 
     private fun performCanBuy(player: Player) {
         val chunks = Chunks(player.chunk)
-        asynchronously {
+        Bukkit.getScheduler().runTaskAsynchronously(Chunkly.plugin, Runnable {
+            val uuid= Bukkit.getPlayer(chunks.getOwner().toString())?.uniqueId
+            if (uuid!=null) UserData.removeChunk(chunks.getChunk()?.chunkKey.toString(), uuid)
             val canBuy = chunks.canBuy()
             chunks.setCanBuy(!canBuy)
             Bukkit.getScheduler().runTask(plugin, Runnable {
@@ -73,7 +76,7 @@ class ChunkCommand(plugin: JavaPlugin) : TabExecutor {
                     true
                 )
             })
-        }
+        })
     }
 
     private fun performGiveItem(p0: Player, p3: Array<out String>) {
@@ -82,16 +85,24 @@ class ChunkCommand(plugin: JavaPlugin) : TabExecutor {
             return
         }
 
-        asynchronously {
+        Bukkit.getScheduler().runTaskAsynchronously(Chunkly.plugin, Runnable {
             val config = YamlConfiguration.loadConfiguration(getConfigFile("items"))
             val item = config.getItemStack("items") ?: run {
                 Bukkit.getScheduler().runTask(plugin, Runnable {
                     p0.sendMessage(translate("command.ground.cant.buy"), true)
                 })
-                return@asynchronously
+                return@Runnable
             }
-            val player = Bukkit.getPlayer(p3[1]) ?: return@asynchronously
-            val amount = p3[2].toIntOrNull() ?: return@asynchronously
+
+            val player = Bukkit.getPlayer(p3[1])
+            val amount = p3[2].toIntOrNull()
+
+            if (player == null || amount == null) {
+                Bukkit.getScheduler().runTask(plugin, Runnable {
+                    p0.sendMessage(translate("command.ground.invalid.args"), true)
+                })
+                return@Runnable
+            }
 
             Bukkit.getScheduler().runTask(plugin, Runnable {
                 p0.sendMessage(
@@ -103,12 +114,11 @@ class ChunkCommand(plugin: JavaPlugin) : TabExecutor {
                 item.amount = amount
                 player.inventory.addItem(item)
             })
-        }
+        })
     }
 
     private fun performOwning(p0: Player, p3: Array<out String>) {
-        // TODO: 소유권 이전 로직 추가 필요 (현재 미완성)
-        sendUsage(p0)
+        sendUsage(p0) // 소유권 이전 로직이 미완성인 상태로 두었습니다.
     }
 
     private fun performPermission(p0: CommandSender, p3: Array<out String>) {
@@ -116,28 +126,22 @@ class ChunkCommand(plugin: JavaPlugin) : TabExecutor {
         val target = Bukkit.getPlayer(p3[2]) ?: return
         val player = p0 as Player
 
-        asynchronously {
+        Bukkit.getScheduler().runTaskAsynchronously(Chunkly.plugin, Runnable {
             when (execute) {
                 "추가" -> {
                     UserData.addMember(target, player.uniqueId)
                     Bukkit.getScheduler().runTask(plugin, Runnable {
-                        p0.sendMessage(
-                            translate("command.ground.member.add").replace("{player}", target.name),
-                            true
-                        )
+                        p0.sendMessage(translate("command.ground.member.add").replace("{player}", target.name), true)
                     })
                 }
                 "제거" -> {
                     UserData.removeMember(target, player.uniqueId)
                     Bukkit.getScheduler().runTask(plugin, Runnable {
-                        p0.sendMessage(
-                            translate("command.ground.member.remove").replace("{player}", target.name),
-                            true
-                        )
+                        p0.sendMessage(translate("command.ground.member.remove").replace("{player}", target.name), true)
                     })
                 }
             }
-        }
+        })
     }
 
     private fun performItem(p0: CommandSender) {
@@ -152,7 +156,7 @@ class ChunkCommand(plugin: JavaPlugin) : TabExecutor {
             return
         }
 
-        asynchronously {
+        Bukkit.getScheduler().runTaskAsynchronously(Chunkly.plugin, Runnable {
             val file = getConfigFile("items")
             val config = YamlConfiguration.loadConfiguration(file)
             config.set("items", item)
@@ -160,141 +164,87 @@ class ChunkCommand(plugin: JavaPlugin) : TabExecutor {
             Bukkit.getScheduler().runTask(plugin, Runnable {
                 player.sendMessage(translate("command.ground.set.item"), true)
             })
-        }
+        })
     }
 
     private fun performRemoveChunk(p0: Player, chunkKey: String) {
-        asynchronously {
-            val file = File("${plugin.dataFolder}/chunkdata", chunkKey)
-            if (!file.exists()) return@asynchronously
+        Bukkit.getScheduler().runTaskAsynchronously(Chunkly.plugin, Runnable {
+            if (!p0.isOp) return@Runnable
+
+            val file = File("${plugin.dataFolder}/chunkdata", "${chunkKey}.yml")
+            if (!file.exists()) return@Runnable
 
             val config = YamlConfiguration.loadConfiguration(file)
-            val chunk = Bukkit.getWorld(UUID.fromString(config.getString("chunk.world")))
-                ?.getChunkAt(config.getInt("chunk.location.x"), config.getInt("chunk.location.z"))
-                ?: return@asynchronously
-            val owner = Bukkit.getPlayer(Chunks(chunk).getOwner().toString())
+            val chunk = Bukkit.getWorld(UUID.fromString(config.getString("chunk.world")))?.getChunkAt(config.getInt("chunk.location.x"), config.getInt("chunk.location.z"))
+                ?: return@Runnable
 
+            val owner = Bukkit.getPlayer(Chunks(chunk).getOwner().toString()) ?: return@Runnable
+
+            UserData.removeChunk(chunk.chunkKey.toString(), owner.uniqueId)
             EconManager.sellChunk(chunk, null)
             file.delete()
 
             Bukkit.getScheduler().runTask(plugin, Runnable {
-                owner?.sendMessage(translate("command.ground.force.sell.owner"), true)
+                owner.sendMessage(translate("command.ground.force.sell.owner"), true)
                 p0.sendMessage(translate("command.ground.force.sell"), true)
                 chunk.persistentDataContainer.remove(NamespacedKey(plugin, "owner"))
                 performList(p0)
             })
-        }
+        })
     }
 
     private fun performList(p0: CommandSender) {
         if (p0 !is Player) return
+        if (!p0.hasPermission("apo.chunkly.cmds")) {
+            p0.sendMessage(translate("command.no.permission"), true)
+            return
+        }
+
         val msg = translate("command.ground.list").split("|")
         p0.sendMessage(msg[0], true)
 
-        asynchronously {
+        Bukkit.getScheduler().runTaskAsynchronously(Chunkly.plugin, Runnable {
             if (p0.isOp) {
-                val chunkList= File(plugin.dataFolder, "chunkdata").listFiles()?.map { it.name } ?: emptyList()
-                if (chunkList.isEmpty()) {
-                    Bukkit.getScheduler().runTask(plugin, Runnable {
-                        p0.sendMessage(translate("command.ground.list.no"), true)
-                    })
-                    return@asynchronously
-                }
-
-                Bukkit.getScheduler().runTask(plugin, Runnable {
-                    chunkList.forEach { chunk ->
-                        if (p0.isOp) {
-                            p0.sendMessage(prefix.append(
-                                Component.text(msg[1].replace("{list}", chunk.replace(".yml", "")) + " [ " +
-                                        Chunks(getChunk(chunk.replace(".yml", "").toLong()) ?: return@forEach).getOwner() + " ]")
-                                    .append(Component.text(" [TP]")
-                                        .color(NamedTextColor.GRAY)
-                                        .clickEvent(
-                                            ClickEvent.clickEvent(
-                                                ClickEvent.Action.RUN_COMMAND,
-                                                run {
-                                                    val chunkData = getChunk(chunk.toLong()) ?: return@run ""
-                                                    val x = (chunkData.x shl 4) + 8
-                                                    val z = (chunkData.z shl 4) + 8
-                                                    val y = chunkData.world.getHighestBlockYAt(x, z)
-                                                    p0.teleport(Location(chunkData.world, x.toDouble(), y.toDouble(), z.toDouble()))
-                                                    ""
-                                                }
-                                            )
-                                        ))
-                                    .append(Component.text(" [제거]")
-                                        .color(NamedTextColor.RED)
-                                        .clickEvent(
-                                            ClickEvent.clickEvent(
-                                                ClickEvent.Action.RUN_COMMAND,
-                                                "/땅 removeChunk $chunk"
-                                            )
-                                        ))
-                            ))
-                        } else {
-                            p0.sendMessage("${msg[1].replace("{list}", chunk)} &7${"[ &a" + Chunks(
-                                getChunk(chunk.toLong()) ?: return@forEach
-                            ).getOwner() + "&7]"}", true)
-                        }
-                    }
-                })
+                val chunkList = File(plugin.dataFolder, "chunkdata").listFiles()?.map { it.name.replace(".yml", "") } ?: emptyList()
+                sendChunkList(p0, chunkList, msg)
             } else {
-                if (!p0.hasPermission("apo.chunkly.cmds")) {
-                    Bukkit.getScheduler().runTask(plugin, Runnable {
-                        p0.sendMessage(translate("command.no.permission"), true)
-                    })
-                    return@asynchronously
-                }
-                UserData.getConfig(p0.uniqueId) {
-                    val chunkList= it.getStringList("user.has-chunk")
-
-                    if (chunkList.isEmpty()) {
-                        Bukkit.getScheduler().runTask(plugin, Runnable {
-                            p0.sendMessage(translate("command.ground.list.no"), true)
-                        })
-                        return@getConfig
-                    }
-
-                    Bukkit.getScheduler().runTask(plugin, Runnable {
-                        chunkList.forEach { chunk ->
-                            if (p0.isOp) {
-                                p0.sendMessage(prefix.append(
-                                    Component.text(msg[1].replace("{list}", chunk.replace(".yml", "")) + " [ " +
-                                            Chunks(getChunk(chunk.replace(".yml", "").toLong()) ?: return@forEach).getOwner() + " ]")
-                                        .append(Component.text(" [TP]")
-                                            .color(NamedTextColor.GRAY)
-                                            .clickEvent(
-                                                ClickEvent.clickEvent(
-                                                    ClickEvent.Action.RUN_COMMAND,
-                                                    run {
-                                                        val chunkData = getChunk(chunk.toLong()) ?: return@run ""
-                                                        val x = (chunkData.x shl 4) + 8
-                                                        val z = (chunkData.z shl 4) + 8
-                                                        val y = chunkData.world.getHighestBlockYAt(x, z)
-                                                        p0.teleport(Location(chunkData.world, x.toDouble(), y.toDouble(), z.toDouble()))
-                                                        ""
-                                                    }
-                                                )
-                                            ))
-                                        .append(Component.text(" [제거]")
-                                            .color(NamedTextColor.RED)
-                                            .clickEvent(
-                                                ClickEvent.clickEvent(
-                                                    ClickEvent.Action.RUN_COMMAND,
-                                                    "/땅 removeChunk $chunk"
-                                                )
-                                            ))
-                                ))
-                            } else {
-                                p0.sendMessage("${msg[1].replace("{list}", chunk)} &7${"[ &a" + Chunks(
-                                    getChunk(chunk.toLong()) ?: return@forEach
-                                ).getOwner() + "&7]"}", true)
-                            }
-                        }
-                    })
+                UserData.getConfig(p0.uniqueId) { config ->
+                    val chunkList = config.getStringList("user.has-chunk")
+                    sendChunkList(p0, chunkList, msg)
                 }
             }
-        }
+        })
+    }
+
+    private fun sendChunkList(p0: Player, chunkList: List<String>, msg: List<String>) {
+        Bukkit.getScheduler().runTask(plugin, Runnable {
+            if (chunkList.isEmpty()) {
+                p0.sendMessage(translate("command.ground.list.no"), true)
+                return@Runnable
+            }
+            chunkList.forEach { chunk ->
+                if (p0.isOp) {
+                    val chunkData = getChunk(chunk.toLong()) ?: return@forEach
+                    p0.sendMessage(prefix.append(
+                        "${msg[1].replace("{list}", chunk)} [ &a${Chunks(chunkData).getOwner()}&b ]".str2Component()
+                            .append(Component.text(" [TP]")
+                                .color(NamedTextColor.GRAY)
+                                .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, run {
+                                    val x = (chunkData.x shl 4) + 8
+                                    val z = (chunkData.z shl 4) + 8
+                                    val y = chunkData.world.getHighestBlockYAt(x, z) + 1
+                                    "/minecraft:tp @s $x $y $z"
+                                }))
+                                .append(Component.text(" [제거]")
+                                    .color(NamedTextColor.RED)
+                                    .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, "/땅 removeChunk $chunk")))
+                            )))
+                } else {
+                    val chunkData = getChunk(chunk.toLong()) ?: return@forEach
+                    p0.sendMessage("${msg[1].replace("{list}", chunk)} &7[ &ax&7: &f${(chunkData.x shl 4) + 8}, &cz&7: &f${(chunkData.z shl 4) + 8} &7]", true)
+                }
+            }
+        })
     }
 
     private fun sendUsage(p0: CommandSender) {
@@ -305,6 +255,14 @@ class ChunkCommand(plugin: JavaPlugin) : TabExecutor {
         message.forEach {
             p0.sendMessage(it, true)
         }
+    }
+
+    private fun getChunk(chunkKey: Long): Chunk? {
+        val file = File("${Chunkly.plugin.dataFolder}/chunkdata", "$chunkKey.yml")
+        if (!file.exists()) return null
+        val config = YamlConfiguration.loadConfiguration(file)
+        return Bukkit.getWorld(UUID.fromString(config.getString("chunk.world")))
+            ?.getChunkAt(config.getInt("chunk.location.x"), config.getInt("chunk.location.z"))
     }
 
     override fun onTabComplete(
@@ -356,13 +314,5 @@ class ChunkCommand(plugin: JavaPlugin) : TabExecutor {
         }
 
         return tab
-    }
-
-    private fun getChunk(chunkKey: Long): Chunk? {
-        val file = File("${Chunkly.plugin.dataFolder}/chunkdata", chunkKey.toString())
-        if (!file.exists()) return null
-        val config = YamlConfiguration.loadConfiguration(file)
-        return Bukkit.getWorld(UUID.fromString(config.getString("chunk.world")))
-            ?.getChunkAt(config.getInt("chunk.location.x"), config.getInt("chunk.location.z"))
     }
 }
