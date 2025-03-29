@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "kr.apo2073"
-version = "1.0"
+version = "1.5"
 
 repositories {
     mavenCentral()
@@ -50,6 +50,6 @@ tasks.processResources {
 }
 tasks.jar {
     archiveFileName.set("Chunkly.jar")
-    destinationDirectory=file("C:\\Users\\PC\\Desktop\\Test_Server\\plugins")
+//    destinationDirectory=file("C:\\Users\\PC\\Desktop\\Test_Server\\plugins")
 //    destinationDirectory=file("C:\\Users\\이태수\\Desktop\\Chunkly\\server\\plugins")
 }

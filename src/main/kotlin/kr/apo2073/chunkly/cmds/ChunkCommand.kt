@@ -64,6 +64,7 @@ class ChunkCommand(plugin: JavaPlugin) : TabExecutor {
     }
 
     private fun performCanBuy(player: Player) {
+        if (!(player.isOp)) return
         val chunks = Chunks(player.chunk)
         Bukkit.getScheduler().runTaskAsynchronously(Chunkly.plugin, Runnable {
             val uuid= Bukkit.getPlayer(chunks.getOwner().toString())?.uniqueId
@@ -123,22 +124,40 @@ class ChunkCommand(plugin: JavaPlugin) : TabExecutor {
 
     private fun performPermission(p0: CommandSender, p3: Array<out String>) {
         val execute = p3[1]
-        val target = Bukkit.getPlayer(p3[2]) ?: return
+        val target = Bukkit.getPlayer(p3[2])
         val player = p0 as Player
 
         Bukkit.getScheduler().runTaskAsynchronously(Chunkly.plugin, Runnable {
-            when (execute) {
-                "추가" -> {
-                    UserData.addMember(target, player.uniqueId)
-                    Bukkit.getScheduler().runTask(plugin, Runnable {
-                        p0.sendMessage(translate("command.ground.member.add").replace("{player}", target.name), true)
-                    })
-                }
-                "제거" -> {
-                    UserData.removeMember(target, player.uniqueId)
-                    Bukkit.getScheduler().runTask(plugin, Runnable {
-                        p0.sendMessage(translate("command.ground.member.remove").replace("{player}", target.name), true)
-                    })
+            if (target==null) {
+                player.sendMessage(translate("command.not.exist.player"), true)
+                return@Runnable
+            }
+            if (target==player) {
+                player.sendMessage(translate("command.ground.member.me"), true)
+                return@Runnable
+            }
+            UserData.getMember(player.uniqueId) {
+                when (execute) {
+                    "추가" -> {
+                        if (it.contains(target.uniqueId)) {
+                            player.sendMessage(translate("command.ground.member.add.exist").replace("{player}", target.name), true)
+                            return@getMember
+                        }
+                        UserData.addMember(target, player.uniqueId)
+                        Bukkit.getScheduler().runTask(plugin, Runnable {
+                            p0.sendMessage(translate("command.ground.member.add").replace("{player}", target.name), true)
+                        })
+                    }
+                    "제거" -> {
+                        if (it.contains(target.uniqueId).not()) {
+                            player.sendMessage(translate("command.ground.member.remove.not.exist").replace("{player}", target.name), true)
+                            return@getMember
+                        }
+                        UserData.removeMember(target, player.uniqueId)
+                        Bukkit.getScheduler().runTask(plugin, Runnable {
+                            p0.sendMessage(translate("command.ground.member.remove").replace("{player}", target.name), true)
+                        })
+                    }
                 }
             }
         })
